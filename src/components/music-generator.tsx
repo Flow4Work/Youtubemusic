@@ -10,6 +10,13 @@ import { clearHistory, loadHistory, prependHistory, removeHistory } from "@/lib/
 import type { Artist, GeneratedPayload, GenerateResponse, GenerationResult, GenerationTarget } from "@/lib/types";
 
 const targetLabel: Record<GenerationTarget, string> = { all: "전체 결과", chords: "코드", style: "Suno 스타일", lyrics: "가사", titles: "제목", hashtags: "해시태그" };
+const refreshToastLabel: Record<Exclude<GenerationTarget, "all">, string> = {
+  chords: "코드를 새로 만들고 있습니다.",
+  style: "Suno 스타일을 새로 만들고 있습니다.",
+  lyrics: "가사를 새로 만들고 있습니다.",
+  titles: "제목을 새로 만들고 있습니다.",
+  hashtags: "해시태그를 새로 만들고 있습니다.",
+};
 
 function mergeTarget(current: GenerationResult, incoming: GenerationResult, target: GenerationTarget): GenerationResult {
   if (target === "all") return incoming;
@@ -49,11 +56,13 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
   const [cooldownSeconds, setCooldownSeconds] = useState(0);
   const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null);
   const [copied, setCopied] = useState("");
+  const [refreshToast, setRefreshToast] = useState("");
   const [lyricsTab, setLyricsTab] = useState<"a" | "b">("a");
   const [simplified, setSimplified] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const requestLockRef = useRef(false);
   const copyTimerRef = useRef<number | null>(null);
+  const refreshToastTimerRef = useRef<number | null>(null);
   const countdownTimerRef = useRef<number | null>(null);
   const cooldownTimerRef = useRef<number | null>(null);
 
@@ -63,6 +72,7 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
       window.cancelAnimationFrame(frame);
       abortRef.current?.abort();
       if (copyTimerRef.current) window.clearTimeout(copyTimerRef.current);
+      if (refreshToastTimerRef.current) window.clearTimeout(refreshToastTimerRef.current);
       if (countdownTimerRef.current) window.clearInterval(countdownTimerRef.current);
       if (cooldownTimerRef.current) window.clearInterval(cooldownTimerRef.current);
     };
@@ -140,6 +150,15 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
     }, 1000);
   }
 
+  function showRefreshToast(target: Exclude<GenerationTarget, "all">) {
+    setRefreshToast(refreshToastLabel[target]);
+    if (refreshToastTimerRef.current) window.clearTimeout(refreshToastTimerRef.current);
+    refreshToastTimerRef.current = window.setTimeout(() => {
+      setRefreshToast("");
+      refreshToastTimerRef.current = null;
+    }, 2500);
+  }
+
   async function showCopied(key: string, text: string) {
     if (!text.trim()) return;
     try {
@@ -158,6 +177,7 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
   async function generate(target: GenerationTarget) {
     if (!selectedArtist || !selectedSong || requestLockRef.current || cooldownSeconds > 0) return;
     requestLockRef.current = true;
+    if (target !== "all") showRefreshToast(target);
     const startedAt = Date.now();
     const estimate = target === "all"
       ? durationEstimate
@@ -259,7 +279,7 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
       {message && <div className={`status-message ${message.error ? "error" : "success"}`} role="status">{message.text}</div>}
     </div>
 
-    {copied && <div className="global-copy-toast" role="status">클립보드에 복사되었습니다.</div>}
+    {(refreshToast || copied) && <div className="global-copy-toast" role="status">{refreshToast || "클립보드에 복사되었습니다."}</div>}
     <HistoryDrawer open={historyOpen} history={history} onClose={() => setHistoryOpen(false)} onLoad={loadSaved} onRemove={(id) => setHistory((current) => removeHistory(id, current))} onClear={() => setHistory(clearHistory())}/>
   </main>;
 }
