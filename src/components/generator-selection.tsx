@@ -10,6 +10,7 @@ interface Props {
   selectedSong: Song | null;
   canGenerate: boolean;
   loadingTarget: GenerationTarget | null;
+  remainingSeconds: number | null;
   onQuery: (value: string) => void;
   onArtist: (id: string) => void;
   onSong: (id: string) => void;
@@ -31,6 +32,12 @@ function sourceName(song: Song): string {
   return song.sourceName ?? "출처 정보 없음";
 }
 
+function loadingLabel(remainingSeconds: number | null): string {
+  if (remainingSeconds === null) return "생성 중";
+  if (remainingSeconds <= 0) return "생성 마무리 중";
+  return `생성 중 · 약 ${remainingSeconds}초 남음`;
+}
+
 export function GeneratorSelection(props: Props) {
   return <aside className="selection-shell studio-selection" aria-label="가수와 대표곡 선택">
     <div className="selection-top">
@@ -40,8 +47,8 @@ export function GeneratorSelection(props: Props) {
         <p>가수를 고른 뒤 참고할 대표곡을 선택하세요.</p>
       </div>
       <button type="button" onClick={props.onGenerate} disabled={!props.canGenerate} className="generate-button selection-generate-button">
-        {props.loadingTarget === "all" ? <RefreshIcon className="size-5 animate-spin"/> : <SparklesIcon className="size-5"/>}
-        <span>{props.loadingTarget === "all" ? "만드는 중" : props.selectedSong ? "전체 만들기" : "곡 선택 후 만들기"}</span>
+        {props.loadingTarget ? <RefreshIcon className="size-5 animate-spin"/> : <SparklesIcon className="size-5"/>}
+        <span>{props.loadingTarget ? loadingLabel(props.remainingSeconds) : props.selectedSong ? "전체 만들기" : "곡 선택 후 만들기"}</span>
       </button>
     </div>
 
