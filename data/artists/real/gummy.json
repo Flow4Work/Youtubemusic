@@ -1,0 +1,130 @@
+{
+  "id": "gummy",
+  "name": "거미",
+  "description": "검수된 실제 곡 데이터",
+  "songs": [
+    {
+      "id": "gummy-you-are-my-everything",
+      "artistId": "gummy",
+      "artistName": "거미",
+      "title": "You Are My Everything",
+      "key": "Gb major",
+      "bpm": 68,
+      "timeSignature": null,
+      "sections": {
+        "intro": [],
+        "verse": [],
+        "preChorus": [],
+        "chorus": [],
+        "bridge": [],
+        "finalChorus": []
+      },
+      "sources": [
+        {
+          "name": "악보바다 원키 악보",
+          "url": "https://www.akbobada.com/musicDetail.html?musicID=68210"
+        },
+        {
+          "name": "뮤직스코어 원키 악보",
+          "url": "https://www.musicscore.co.kr/m_score/score_detail.asp?s_rndidx=OG7DCS4S8L20160310101854"
+        },
+        {
+          "name": "Chordify 원곡 분석",
+          "url": "https://chordify.net/chords/gummy-songs/you-are-my-everything-chords"
+        },
+        {
+          "name": "ChordU 원곡 뮤직비디오 분석",
+          "url": "https://chordu.com/chords-tabs--mv-gummy-%EA%B1%B0%EB%AF%B8-you-are-my-everything-l-descendants-of-the-sun-%ED%83%9C%EC%96%91%EC%9D%98-%ED%9B%84%EC%98%88-ost-id_ToASX6axGuw"
+        },
+        {
+          "name": "GitHub 정확 곡명 검색",
+          "url": "https://github.com/search?q=%22%EA%B1%B0%EB%AF%B8%22+%22You+Are+My+Everything%22+chord&type=code"
+        }
+      ],
+      "verified": true,
+      "verificationNote": "악보바다와 뮤직스코어는 원키를 Gb major로 명시한다. Chordify와 ChordU는 이명동조인 F# major로 분석하며 B-C#-F#-D#m 및 G#m-C#-F# 중심 코드가 일치한다. 자동 분석의 전체 템포는 약 136 BPM이며 하프타임인 68 BPM을 저장했다. 공개된 타르테 코드표는 C major로 조옮김된 자료이므로 섹션 작성에서 제외했다."
+    },
+    {
+      "id": "gummy-we-should-have-been-friends",
+      "artistId": "gummy",
+      "artistName": "거미",
+      "title": "친구라도 될 걸 그랬어",
+      "key": "A major",
+      "bpm": 65,
+      "timeSignature": null,
+      "sections": {
+        "intro": [],
+        "verse": [],
+        "preChorus": [],
+        "chorus": [],
+        "bridge": [],
+        "finalChorus": []
+      },
+      "sources": [
+        {
+          "name": "악보바다 원키 악보",
+          "url": "https://www.akbobada.com/musicDetail.html?musicID=34728"
+        },
+        {
+          "name": "Chordify 원곡 뮤직비디오 분석",
+          "url": "https://chordify.net/chords/gummy-songs/chingulado-doel-geol-geulaess-eo-chords"
+        },
+        {
+          "name": "ChordU 원곡 분석",
+          "url": "https://chordu.com/chords-tabs-gummy-%EA%B1%B0%EB%AF%B8-we-should-ve-been-friends-%EC%B9%9C%EA%B5%AC%EB%9D%BC%EB%8F%84-%EB%90%A0-%EA%B1%B8-%EA%B7%B8%EB%9E%98%EC%96%B4-m-v-id_K3Bq9mIHbzw"
+        },
+        {
+          "name": "SongBPM 원곡 분석",
+          "url": "https://songbpm.com/%40gummy/cingurado-doel-geol-geuraesseo-8HH-Nl3Coi"
+        },
+        {
+          "name": "GitHub 정확 곡명 검색",
+          "url": "https://github.com/search?q=%22%EA%B1%B0%EB%AF%B8%22+%22%EC%B9%9C%EA%B5%AC%EB%9D%BC%EB%8F%84+%EB%90%A0+%EA%B1%B8+%EA%B7%B8%EB%9E%98%EC%96%B4%22+chord&type=code"
+        }
+      ],
+      "verified": true,
+      "verificationNote": "악보바다와 Chordify가 원키 A major로 일치한다. Chordify는 65 BPM과 B-Bm7-E-A 중심 코드를 제시하고 ChordU에서도 A, E, Bm, D, F#m 계열 코드가 확인된다. SongBPM의 Ab major 분석은 다른 두 자료와 충돌하므로 사용하지 않았다. 원키 코드의 정확한 섹션 경계를 제공하는 두 자료를 확인하지 못해 배열은 비워 두었다."
+    },
+    {
+      "id": "gummy-remember-me",
+      "artistId": "gummy",
+      "artistName": "거미",
+      "title": "기억해줘요 내 모든 날과 그때를",
+      "key": "Db major → E major",
+      "bpm": 68,
+      "timeSignature": "4/4",
+      "sections": {
+        "intro": [],
+        "verse": [],
+        "preChorus": [],
+        "chorus": [],
+        "bridge": [],
+        "finalChorus": []
+      },
+      "sources": [
+        {
+          "name": "악보바다 원키 악보",
+          "url": "https://www.akbobada.com/musicDetail.html?musicID=78261"
+        },
+        {
+          "name": "Chordify 원곡 분석",
+          "url": "https://chordify.net/chords/gummy-songs/remember-me-chords"
+        },
+        {
+          "name": "ChordU 원곡 분석",
+          "url": "https://chordu.com/chords-tabs-gummy-%EA%B1%B0%EB%AF%B8-remember-me-%EA%B8%B0%EC%96%B5%ED%95%B4%EC%A4%98%EC%9A%94-%EB%82%B4-%EB%AA%A8%EB%93%A0-%EB%82%A0%EA%B3%BC-%EA%B7%B8%EB%95%8C%EB%A5%BC-hotel-del-luna-ost-part-7-lyrics-han-rom-eng-%EA%B0%80%EC%82%AC--id_dD1ZTupRWys"
+        },
+        {
+          "name": "SongBPM 원곡 분석",
+          "url": "https://songbpm.com/%40gummy/gieoghaejweoyo-nae-modeun-nalgwa-geuddaereul-f21jntL1m2"
+        },
+        {
+          "name": "GitHub 정확 곡명 검색",
+          "url": "https://github.com/search?q=%22%EA%B1%B0%EB%AF%B8%22+%22%EA%B8%B0%EC%96%B5%ED%95%B4%EC%A4%98%EC%9A%94+%EB%82%B4+%EB%AA%A8%EB%93%A0+%EB%82%A0%EA%B3%BC+%EA%B7%B8%EB%95%8C%EB%A5%BC%22+chord&type=code"
+        }
+      ],
+      "verified": false,
+      "verificationNote": "악보바다는 원곡의 조성 범위를 Db-E로 명시한다. SongBPM은 최종 조성인 E major와 136 BPM, 4박자를 제시해 하프타임 68 BPM으로 저장했다. 반면 Chordify는 일부 음원에서 B major와 70 BPM으로 분석해 원키 악보와 충돌한다. 원곡 전조를 포함한 섹션별 코드 진행을 두 출처에서 교차 확인하지 못했으므로 배열을 비우고 verified는 false로 처리했다."
+    }
+  ]
+}
