@@ -1,0 +1,47 @@
+.resultsGrid {
+  grid-template-rows: minmax(0, .72fr) minmax(0, 1.28fr) !important;
+}
+
+.codePosition {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+}
+
+.lyricsPosition {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+}
+
+.publishStack {
+  grid-template-rows: minmax(0, 1.55fr) minmax(0, .45fr) !important;
+}
+
+.styleCompact {
+  padding-bottom: 14px;
+}
+
+.titleCard :global(.title-row) {
+  min-height: 58px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+
+.titleCard :global(.title-text strong) {
+  font-size: 17px;
+}
+
+@media (max-width: 767px) {
+  .resultsGrid {
+    grid-template-rows: none !important;
+  }
+
+  .codePosition,
+  .lyricsPosition {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+  }
+
+  .publishStack {
+    grid-template-rows: none !important;
+  }
+}
