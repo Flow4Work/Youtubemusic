@@ -40,13 +40,13 @@ function cleanLyrics(text: string): string {
 
 function EmptyCard({ text, loading }: { text: string; loading: boolean }) {
   return <div className={`card-empty ${loading ? "loading" : ""}`}>
-    <SparklesIcon className={`size-6 ${loading ? "animate-pulse" : ""}`}/>
+    <SparklesIcon className={`size-8 ${loading ? "animate-pulse" : ""}`}/>
     <p>{loading ? "결과를 만드는 중입니다." : text}</p>
   </div>;
 }
 
 function StaticCardTitle({ eyebrow, title }: { eyebrow: string; title: string }) {
-  return <div><p className="text-[11px] font-semibold tracking-[0.14em] text-blue-600 uppercase">{eyebrow}</p><h3 className="mt-1 text-[17px] font-bold tracking-[-0.02em] text-slate-950">{title}</h3></div>;
+  return <div className="shrink-0"><p className="text-[17px] font-semibold tracking-[0.12em] text-blue-600 uppercase">{eyebrow}</p><h3 className="mt-1 text-[26px] font-bold tracking-[-0.03em] text-slate-950">{title}</h3></div>;
 }
 
 export function GeneratorResults(props: Props) {
@@ -60,32 +60,32 @@ export function GeneratorResults(props: Props) {
     <article className="result-card code-card">
       {result && chords ? <>
         <CardHeader eyebrow="01 · CHORD" title="코드" copy={() => props.onCopy("chords", chordText(chords))} regenerate={() => props.onGenerate("chords")} busy={loading === "chords"}/>
-        <div className="mt-4 flex flex-wrap gap-2"><span className="metric-pill">Key {chords.key}</span><span className="metric-pill">{chords.bpm} BPM</span><span className="metric-pill">{chords.timeSignature}</span></div>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <button type="button" className="mini-button" onClick={() => props.onTranspose(-1)}><ArrowDownIcon className="size-3.5"/> 반음 내리기</button>
-          <button type="button" className="mini-button" onClick={() => props.onTranspose(1)}><ArrowUpIcon className="size-3.5"/> 반음 올리기</button>
+        <div className="mt-4 flex shrink-0 flex-wrap gap-2"><span className="metric-pill">Key {chords.key}</span><span className="metric-pill">{chords.bpm} BPM</span><span className="metric-pill">{chords.timeSignature}</span></div>
+        <div className="mt-3 flex shrink-0 flex-wrap gap-2">
+          <button type="button" className="mini-button" onClick={() => props.onTranspose(-1)}><ArrowDownIcon className="size-4.5"/> 반음 내리기</button>
+          <button type="button" className="mini-button" onClick={() => props.onTranspose(1)}><ArrowUpIcon className="size-4.5"/> 반음 올리기</button>
           <button type="button" className={`mini-button ${props.simplified ? "active" : ""}`} onClick={props.onSimplified}>쉬운 코드</button>
         </div>
-        <div className="result-scroll mt-4 space-y-2">{Object.entries(chords.sections).filter(([, values]) => values.length > 0).map(([name, values]) => <div key={name} className="chord-section"><div className="flex items-center justify-between gap-2"><strong>{sectionLabel[name] ?? name}</strong><button type="button" onClick={() => props.onCopy(`section-${name}`, values.join(" | "))} className="section-copy-button"><CopyIcon className="size-3.5"/>{props.copied === `section-${name}` ? "완료" : "복사"}</button></div><p>{values.join(" | ")}</p></div>)}</div>
+        <div className="result-scroll mt-4 space-y-3">{Object.entries(chords.sections).filter(([, values]) => values.length > 0).map(([name, values]) => <div key={name} className="chord-section"><div className="flex items-center justify-between gap-3"><strong>{sectionLabel[name] ?? name}</strong><button type="button" onClick={() => props.onCopy(`section-${name}`, values.join(" | "))} className="section-copy-button"><CopyIcon className="size-4.5"/>{props.copied === `section-${name}` ? "완료" : "복사"}</button></div><p>{values.join(" | ")}</p></div>)}</div>
       </> : <><StaticCardTitle eyebrow="01 · CHORD" title="코드"/><EmptyCard text="생성된 코드가 여기에 표시됩니다." loading={isInitialLoading}/></>}
     </article>
 
     <article className="result-card style-card">
       {result ? <>
         <CardHeader eyebrow="02 · SUNO STYLE" title="Suno에 넣을 스타일" copy={() => props.onCopy("style", result.sunoStyle)} regenerate={() => props.onGenerate("style")} busy={loading === "style"}/>
-        <div className="language-toggle" aria-label="Suno 스타일 언어 전환">
+        <div className="language-toggle shrink-0" aria-label="Suno 스타일 언어 전환">
           <button type="button" onClick={() => setStyleLanguage("en")} className={styleLanguage === "en" ? "active" : ""}>영어</button>
           <button type="button" onClick={() => setStyleLanguage("ko")} className={styleLanguage === "ko" ? "active" : ""}>한국어 뜻</button>
         </div>
         <div className="result-scroll mt-4"><p className="style-copy whitespace-pre-wrap">{styleLanguage === "en" ? result.sunoStyle : result.sunoStyleKorean}</p></div>
-        {styleLanguage === "ko" && <p className="translation-note">복사 버튼은 Suno 입력용 영어 문장을 복사합니다.</p>}
+        {styleLanguage === "ko" && <p className="translation-note shrink-0">복사 버튼은 Suno 입력용 영어 문장을 복사합니다.</p>}
       </> : <><StaticCardTitle eyebrow="02 · SUNO STYLE" title="Suno에 넣을 스타일"/><EmptyCard text="영어 스타일과 한국어 뜻이 표시됩니다." loading={isInitialLoading}/></>}
     </article>
 
     <article className="result-card lyrics-card">
       {result ? <>
         <CardHeader eyebrow="03 · LYRICS" title="가사" copy={() => props.onCopy("lyrics", selectedLyrics)} regenerate={() => props.onGenerate("lyrics")} busy={loading === "lyrics"}/>
-        <div className="mt-4 grid grid-cols-2 rounded-xl bg-slate-100 p-1">{(["a", "b"] as const).map((tab) => <button key={tab} type="button" onClick={() => props.onLyricsTab(tab)} className={`lyrics-tab ${props.lyricsTab === tab ? "active" : ""}`}>{tab.toUpperCase()}안 <small>{tab === "a" ? "긴 가사" : "기본"}</small>{props.lyricsTab === tab && <CheckIcon className="size-3.5"/>}</button>)}</div>
+        <div className="mt-4 grid shrink-0 grid-cols-2 rounded-xl bg-slate-100 p-1">{(["a", "b"] as const).map((tab) => <button key={tab} type="button" onClick={() => props.onLyricsTab(tab)} className={`lyrics-tab ${props.lyricsTab === tab ? "active" : ""}`}>{tab.toUpperCase()}안 <small>{tab === "a" ? "긴 가사" : "기본"}</small>{props.lyricsTab === tab && <CheckIcon className="size-4.5"/>}</button>)}</div>
         <pre className="result-scroll lyrics-pre mt-3">{selectedLyrics}</pre>
       </> : <><StaticCardTitle eyebrow="03 · LYRICS" title="가사"/><EmptyCard text="구간명 없이 실제 가사만 표시됩니다." loading={isInitialLoading}/></>}
     </article>
@@ -98,8 +98,8 @@ export function GeneratorResults(props: Props) {
             <span className="title-number">{index + 1}</span>
             <span className="title-text"><strong>{title}</strong><small>{englishTitles[index]}</small></span>
             <span className="title-copy-actions">
-              <button type="button" onClick={() => props.onCopy(`title-ko-${index}`, title)} className="title-copy-button" aria-label={`${title} 한글 복사`} title="한글 제목 복사"><CopyIcon className="size-4"/><b>한</b></button>
-              <button type="button" onClick={() => props.onCopy(`title-en-${index}`, englishTitles[index] ?? title)} className="title-copy-button" aria-label={`${title} 영문 복사`} title="영문 제목 복사"><CopyIcon className="size-4"/><b>EN</b></button>
+              <button type="button" onClick={() => props.onCopy(`title-ko-${index}`, title)} className="title-copy-button" aria-label={`${title} 한글 복사`} title="한글 제목 복사"><CopyIcon className="size-5"/><b>한</b></button>
+              <button type="button" onClick={() => props.onCopy(`title-en-${index}`, englishTitles[index] ?? title)} className="title-copy-button" aria-label={`${title} 영문 복사`} title="영문 제목 복사"><CopyIcon className="size-5"/><b>EN</b></button>
             </span>
           </li>)}</ol>
         </> : <><StaticCardTitle eyebrow="04 · TITLE" title="제목"/><EmptyCard text="한글과 영어 제목 후보 3개가 표시됩니다." loading={isInitialLoading}/></>}
