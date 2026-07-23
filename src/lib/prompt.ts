@@ -17,11 +17,13 @@ function copyrightRules(): string {
 }
 
 function lyricRules(): string {
-  return `한국어로 실제 노래 가사만 작성하세요.
-[Verse], Verse, Pre-Chorus, Chorus, Bridge, Outro 같은 구간명과 설명은 절대 넣지 마세요.
-A안은 30~36줄, B안은 20~24줄로 작성하고 A안이 B안보다 약 150% 길어야 합니다.
+  return `한국어로 실제 노래 가사를 작성하세요.
+각 구간 시작에는 반드시 영어 구간명을 대괄호로 표시하세요. 사용할 수 있는 표시는 [Verse 1], [Pre-Chorus], [Chorus], [Verse 2], [Bridge], [Final Chorus], [Outro]입니다.
+구간명 외의 설명, 작곡 지시, 괄호 속 해설은 넣지 마세요.
+A안의 실제 가사 문장은 24~28줄, B안은 20~24줄로 작성하세요. 구간명 줄은 가사 문장 수에 포함하지 마세요.
+A안은 기존 분량보다 약 20% 짧고 밀도 있게 구성하되 B안보다는 조금 더 풍부하게 만드세요.
 A안과 B안은 주제, 장면, 핵심 표현을 확실히 다르게 만드세요.
-첫 4줄 안에 시간, 장소, 행동 또는 사물 중 최소 2개가 드러나는 구체적인 장면을 넣으세요.
+첫 Verse의 4줄 안에 시간, 장소, 행동 또는 사물 중 최소 2개가 드러나는 구체적인 장면을 넣으세요.
 각 안에는 시작 장면, 감정의 변화, 마지막 선택이 느껴지는 흐름이 있어야 합니다.
 설명문이나 일기처럼 길게 쓰지 말고 한 줄이 자연스럽게 노래로 불릴 수 있게 만드세요.
 같은 문장 종결과 같은 단어를 연속해서 반복하지 마세요.
@@ -66,8 +68,8 @@ ${songContext(input)}
   "sunoStyle": "English-only Suno style prompt",
   "sunoStyleKorean": "영어 스타일의 한국어 뜻",
   "lyrics": {
-    "a": "구간명 없는 30~36줄 가사",
-    "b": "구간명 없는 20~24줄 가사"
+    "a": "[Verse 1]\\n가사...\\n[Pre-Chorus]\\n가사...\\n[Chorus]\\n가사...\\n[Verse 2]\\n가사...\\n[Bridge]\\n가사...\\n[Final Chorus]\\n가사...\\n[Outro]\\n가사...",
+    "b": "[Verse 1]\\n가사...\\n[Pre-Chorus]\\n가사...\\n[Chorus]\\n가사...\\n[Bridge]\\n가사...\\n[Final Chorus]\\n가사..."
   },
   "titles": ["한국어 제목1", "한국어 제목2", "한국어 제목3"],
   "titlesEnglish": ["English Title 1", "English Title 2", "English Title 3"],
@@ -105,8 +107,8 @@ ${lyricRules()}
 반환 구조:
 {
   "lyrics": {
-    "a": "구간명 없는 30~36줄 가사",
-    "b": "구간명 없는 20~24줄 가사"
+    "a": "[Verse 1]\\n가사...\\n[Pre-Chorus]\\n가사...\\n[Chorus]\\n가사...\\n[Verse 2]\\n가사...\\n[Bridge]\\n가사...\\n[Final Chorus]\\n가사...\\n[Outro]\\n가사...",
+    "b": "[Verse 1]\\n가사...\\n[Pre-Chorus]\\n가사...\\n[Chorus]\\n가사...\\n[Bridge]\\n가사...\\n[Final Chorus]\\n가사..."
   }
 }`;
   }
