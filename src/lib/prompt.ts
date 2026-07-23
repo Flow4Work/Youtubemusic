@@ -5,7 +5,7 @@ export function buildGenerationPrompt(input: GenerateRequest): string {
   const song = input.song;
   const referenceSections = JSON.stringify(song.sections, null, 2);
 
-  return `당신은 한국 대중음악 창작 보조 AI입니다. 음악 지식이 많지 않은 중장년층도 바로 사용할 수 있는 결과를 만드세요.
+  return `당신은 한국 대중음악 창작 보조 AI입니다. 음악 지식이 많지 않은 사용자도 결과를 그대로 복사해 사용할 수 있게 만드세요.
 
 중요한 저작권 원칙:
 - 선택한 곡은 분위기와 구조를 이해하기 위한 참고 자료일 뿐입니다.
@@ -24,14 +24,18 @@ export function buildGenerationPrompt(input: GenerateRequest): string {
 - 기존 결과: ${existing}
 
 생성 규칙:
-1. 모든 설명과 가사는 자연스러운 한국어로 작성합니다.
-2. 코드 진행은 초중급자가 연주 가능한 수준을 우선하되, 너무 단조롭지 않게 만듭니다.
-3. 가사는 A안과 B안의 주제와 표현을 확실히 다르게 만듭니다.
-4. 각 가사는 Verse, Pre-Chorus, Chorus, Verse 2, Bridge 구조를 포함합니다.
-5. 제목은 정확히 3개, 해시태그는 정확히 8개입니다.
-6. Suno 스타일 프롬프트에는 장르, 악기, 보컬 성격, 템포, 전개, 금지 요소를 한 문단으로 포함합니다.
-7. 기존 결과가 있고 생성 대상이 all이 아니라면, 대상 필드만 새롭게 만들고 나머지 필드는 기존 값을 그대로 반환합니다.
-8. Markdown 코드블록이나 설명 문장을 붙이지 말고 JSON 객체 하나만 반환합니다.
+1. 코드와 가사, 한국어 설명, 한국어 제목은 자연스러운 한국어 사용자 경험에 맞춥니다.
+2. sunoStyle은 Suno 입력창에 그대로 붙여 넣을 수 있도록 반드시 영어만 사용해 한 문단으로 작성합니다. 한국어 단어를 섞지 마세요.
+3. sunoStyleKorean에는 sunoStyle의 뜻을 빠짐없이 자연스러운 한국어로 설명합니다.
+4. 코드 진행은 초중급자가 연주 가능한 수준을 우선하되 너무 단조롭지 않게 만듭니다.
+5. 가사는 A안과 B안의 주제와 표현을 확실히 다르게 만듭니다.
+6. 가사 안에는 [Verse], Verse, Pre-Chorus, Chorus, Bridge, Outro 같은 구간명이나 설명을 절대 넣지 말고 실제로 부를 가사 문장만 넣습니다.
+7. A안은 B안보다 약 150% 길게 만듭니다. 권장 분량은 A안 30~36줄, B안 20~24줄입니다.
+8. 한국어 제목은 정확히 3개를 만들고 titlesEnglish에는 각 제목의 자연스러운 영어 제목을 같은 순서로 정확히 3개 만듭니다.
+9. 해시태그는 정확히 8개이며 각 항목은 #으로 시작합니다.
+10. sunoStyle에는 장르, 악기, 보컬 성격, 템포, 전개와 피해야 할 요소를 포함합니다.
+11. 기존 결과가 있고 생성 대상이 all이 아니라면 대상 필드만 새롭게 만들고 나머지 필드는 기존 값을 그대로 반환합니다. style 대상이면 sunoStyle과 sunoStyleKorean을 함께 갱신하고 titles 대상이면 titles와 titlesEnglish를 함께 갱신합니다.
+12. Markdown 코드블록이나 설명 문장을 붙이지 말고 JSON 객체 하나만 반환합니다.
 
 반드시 아래 구조를 정확히 지키세요:
 {
@@ -48,12 +52,14 @@ export function buildGenerationPrompt(input: GenerateRequest): string {
       "outro": ["C", "G", "F", "C"]
     }
   },
-  "sunoStyle": "문장",
+  "sunoStyle": "English-only Suno style prompt",
+  "sunoStyleKorean": "위 영어 스타일의 한국어 뜻",
   "lyrics": {
-    "a": "가사 A 전문",
-    "b": "가사 B 전문"
+    "a": "구간명 없이 실제 가사만 작성한 긴 A안",
+    "b": "구간명 없이 실제 가사만 작성한 B안"
   },
-  "titles": ["제목1", "제목2", "제목3"],
+  "titles": ["한국어 제목1", "한국어 제목2", "한국어 제목3"],
+  "titlesEnglish": ["English Title 1", "English Title 2", "English Title 3"],
   "hashtags": ["#태그1", "#태그2", "#태그3", "#태그4", "#태그5", "#태그6", "#태그7", "#태그8"]
 }`;
 }
