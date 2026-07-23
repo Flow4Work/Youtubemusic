@@ -15,28 +15,28 @@ cp .env.example .env.local
 npm run dev
 ```
 
-API Key가 없어도 Mock 결과로 전체 기능을 확인할 수 있습니다.
+개발 환경에서 `GROQ_API_KEY`가 없을 때만 Mock 결과를 사용합니다. 프로덕션에서는 API Key가 없거나 모든 모델 호출이 실패하면 오류를 표시합니다.
 
 ## AI fallback
 
-1. `GLM_API_KEY`가 있으면 GLM 우선 호출
-2. GLM 실패 시 `GROQ_API_KEY`로 Groq 호출
-3. 두 API가 없거나 모두 실패하면 Mock 결과 표시
+1. `GROQ_PRIMARY_MODEL` (`openai/gpt-oss-120b`)
+2. `GROQ_FALLBACK_MODEL` (`openai/gpt-oss-20b`)
+3. `GROQ_SECONDARY_MODEL` (`llama-3.3-70b-versatile`)
+4. 세 모델이 모두 실패하면 오류 표시
 
 모든 API 호출은 `src/app/api/generate/route.ts`에서만 실행하며 키를 클라이언트에 전달하지 않습니다.
 
 ## 가수 데이터 추가
 
-`data/artists/` 아래에 가수 한 명당 JSON 파일 하나를 추가하고 `data/artists/index.ts`에 import를 등록합니다.
+실제 가수 JSON은 `data/artists/real/`에 가수 한 명당 파일 하나씩 추가합니다. 이 폴더에 JSON이 하나라도 있으면 기존 데모 데이터 대신 실제 JSON만 자동으로 로딩합니다.
 
-필수 검수 원칙:
-
-- 곡명, Key, BPM, 구간별 코드 확인
-- 실제 출처 URL과 라이선스 기록
-- 불명확하면 `verified: false`
+- 별도 import 등록 불필요
+- 빈 코드 구간 허용
+- `verified: false` 허용
+- 실제 출처와 라이선스 정보 유지
 - LLM이 추정한 코드를 원곡 코드처럼 저장하지 않기
 
-현재 포함된 20명은 기능 검증을 위해 직접 만든 **가상 데모 아티스트와 CC0 코드 데이터**입니다. 실제 가수 데이터가 아니며 화면에서도 데모로 표시됩니다.
+현재 `data/artists/` 루트의 20개 JSON은 기능 검증용 가상 데모 데이터입니다.
 
 ## 저장
 
@@ -48,7 +48,7 @@ API Key가 없어도 Mock 결과로 전체 기능을 확인할 수 있습니다.
 - 코드 반음 이동과 쉬운 코드 변환
 - 가사 A안, B안 선택
 - 최근 결과 최대 20개 저장, 불러오기, 삭제
-- GLM → Groq → Mock fallback
+- Groq 120b → 20b → Llama 순차 fallback
 - 데스크톱 4열, 태블릿 2열, 모바일 단계형 레이아웃
 
 ## 검증

@@ -54,7 +54,7 @@ export interface GeneratedPayload extends GenerationResult {
   artistName: string;
   songId: string;
   songTitle: string;
-  provider: "glm" | "groq" | "mock";
+  provider: "groq" | "mock";
   generatedAt: string;
   warning?: string;
 }
@@ -68,6 +68,6 @@ export interface GenerateRequest {
 
 export interface GenerateResponse {
   result: GenerationResult;
-  provider: "glm" | "groq" | "mock";
+  provider: "groq" | "mock";
   warning?: string;
 }

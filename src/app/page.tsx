@@ -1,6 +1,7 @@
 import MusicGenerator from "@/components/music-generator";
-import { artists } from "../../data/artists";
+import { loadArtists } from "../../data/artists";
 
-export default function Home() {
+export default async function Home() {
+  const artists = await loadArtists();
   return <MusicGenerator artists={artists} />;
 }

@@ -6,7 +6,7 @@ export const songSchema = z.object({
   key: z.string().min(1),
   bpm: z.number().int().min(30).max(240),
   timeSignature: z.string().min(1),
-  sections: z.record(z.string(), z.array(z.string().min(1)).min(1)),
+  sections: z.record(z.string(), z.array(z.string())),
   sourceName: z.string().min(1),
   sourceUrl: z.string().min(1),
   license: z.string().min(1),
@@ -26,7 +26,7 @@ export const chordResultSchema = z.object({
   key: z.string().min(1),
   bpm: z.number().int().min(30).max(240),
   timeSignature: z.string().min(1),
-  sections: z.record(z.string(), z.array(z.string().min(1)).min(1)),
+  sections: z.record(z.string(), z.array(z.string())),
 });
 
 export const generationResultSchema = z.object({
