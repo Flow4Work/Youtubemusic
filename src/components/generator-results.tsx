@@ -32,13 +32,8 @@ function chordText(result: ChordResult): string {
   return `Key ${result.key} · ${result.bpm} BPM · ${result.timeSignature}\n\n${sections}`;
 }
 
-function cleanLyrics(text: string): string {
-  return text
-    .split("\n")
-    .filter((line) => !/^\s*(\[[^\]]+\]|(verse|pre[- ]?chorus|chorus|bridge|outro|intro)\s*\d*:?\s*)$/iu.test(line))
-    .join("\n")
-    .replace(/\n{3,}/gu, "\n\n")
-    .trim();
+function formatLyrics(text: string): string {
+  return text.replace(/\n{3,}/gu, "\n\n").trim();
 }
 
 function EmptyCard({ text, loading }: { text: string; loading: boolean }) {
@@ -56,7 +51,7 @@ export function GeneratorResults(props: Props) {
   const { result, chords, loading } = props;
   const [styleLanguage, setStyleLanguage] = useState<"en" | "ko">("en");
   const isInitialLoading = loading === "all" && !result;
-  const selectedLyrics = result ? cleanLyrics(result.lyrics[props.lyricsTab]) : "";
+  const selectedLyrics = result ? formatLyrics(result.lyrics[props.lyricsTab]) : "";
   const englishTitles = result?.titlesEnglish?.length === 3 ? result.titlesEnglish : result?.titles ?? [];
   const disabledLabel = props.cooldownSeconds > 0
     ? `${props.cooldownSeconds}초 후 다시 생성할 수 있습니다.`
@@ -95,7 +90,7 @@ export function GeneratorResults(props: Props) {
         <CardHeader title="가사" copy={() => props.onCopy("lyrics", selectedLyrics)} regenerate={() => props.onGenerate("lyrics")} busy={loading === "lyrics"} disabled={props.regenerationBlocked} disabledLabel={disabledLabel}/>
         <div className="mt-4 grid shrink-0 grid-cols-2 rounded-xl bg-slate-100 p-1">{(["a", "b"] as const).map((tab) => <button key={tab} type="button" onClick={() => props.onLyricsTab(tab)} className={`lyrics-tab ${props.lyricsTab === tab ? "active" : ""}`}>{tab.toUpperCase()}안 <small>{tab === "a" ? "긴 가사" : "기본"}</small>{props.lyricsTab === tab && <CheckIcon className="size-4.5"/>}</button>)}</div>
         <pre className="result-scroll lyrics-pre mt-3">{selectedLyrics}</pre>
-      </> : <><StaticCardTitle title="가사"/><EmptyCard text="구간명 없이 실제 가사만 표시됩니다." loading={isInitialLoading}/></>}
+      </> : <><StaticCardTitle title="가사"/><EmptyCard text="Verse와 Chorus 구간명이 포함된 가사가 표시됩니다." loading={isInitialLoading}/></>}
     </article>
 
     <div className={`publish-stack ${layoutStyles.publishStack}`}>
