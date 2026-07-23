@@ -11,6 +11,8 @@ interface Props {
   result: GeneratedPayload | null;
   chords: ChordResult | null;
   loading: GenerationTarget | null;
+  regenerationBlocked: boolean;
+  cooldownSeconds: number;
   simplified: boolean;
   lyricsTab: "a" | "b";
   copied: string;
@@ -56,11 +58,16 @@ export function GeneratorResults(props: Props) {
   const isInitialLoading = loading === "all" && !result;
   const selectedLyrics = result ? cleanLyrics(result.lyrics[props.lyricsTab]) : "";
   const englishTitles = result?.titlesEnglish?.length === 3 ? result.titlesEnglish : result?.titles ?? [];
+  const disabledLabel = props.cooldownSeconds > 0
+    ? `${props.cooldownSeconds}초 후 다시 생성할 수 있습니다.`
+    : loading
+      ? "현재 생성이 끝난 뒤 다시 시도해 주세요."
+      : undefined;
 
   return <section className={`studio-results ${layoutStyles.resultsGrid}`} aria-label="생성 결과">
     <article className={`result-card code-card ${layoutStyles.codePosition}`}>
       {result && chords ? <>
-        <CardHeader title="코드" copy={() => props.onCopy("chords", chordText(chords))} regenerate={() => props.onGenerate("chords")} busy={loading === "chords"}/>
+        <CardHeader title="코드" copy={() => props.onCopy("chords", chordText(chords))} regenerate={() => props.onGenerate("chords")} busy={loading === "chords"} disabled={props.regenerationBlocked} disabledLabel={disabledLabel}/>
         <div className="mt-3 flex shrink-0 flex-wrap gap-2"><span className="metric-pill">Key {chords.key}</span><span className="metric-pill">{chords.bpm} BPM</span><span className="metric-pill">{chords.timeSignature}</span></div>
         <div className="mt-2 flex shrink-0 flex-wrap gap-2">
           <button type="button" className="mini-button" onClick={() => props.onTranspose(-1)}><ArrowDownIcon className="size-4.5"/> 반음 내리기</button>
@@ -73,7 +80,7 @@ export function GeneratorResults(props: Props) {
 
     <article className={`result-card style-card ${layoutStyles.styleCompact}`}>
       {result ? <>
-        <CardHeader title="Suno에 넣을 스타일" copy={() => props.onCopy("style", result.sunoStyle)} regenerate={() => props.onGenerate("style")} busy={loading === "style"}/>
+        <CardHeader title="Suno에 넣을 스타일" copy={() => props.onCopy("style", result.sunoStyle)} regenerate={() => props.onGenerate("style")} busy={loading === "style"} disabled={props.regenerationBlocked} disabledLabel={disabledLabel}/>
         <div className="language-toggle shrink-0" aria-label="Suno 스타일 언어 전환">
           <button type="button" onClick={() => setStyleLanguage("en")} className={styleLanguage === "en" ? "active" : ""}>영어</button>
           <button type="button" onClick={() => setStyleLanguage("ko")} className={styleLanguage === "ko" ? "active" : ""}>한국어 뜻</button>
@@ -85,7 +92,7 @@ export function GeneratorResults(props: Props) {
 
     <article className={`result-card lyrics-card ${layoutStyles.lyricsPosition}`}>
       {result ? <>
-        <CardHeader title="가사" copy={() => props.onCopy("lyrics", selectedLyrics)} regenerate={() => props.onGenerate("lyrics")} busy={loading === "lyrics"}/>
+        <CardHeader title="가사" copy={() => props.onCopy("lyrics", selectedLyrics)} regenerate={() => props.onGenerate("lyrics")} busy={loading === "lyrics"} disabled={props.regenerationBlocked} disabledLabel={disabledLabel}/>
         <div className="mt-4 grid shrink-0 grid-cols-2 rounded-xl bg-slate-100 p-1">{(["a", "b"] as const).map((tab) => <button key={tab} type="button" onClick={() => props.onLyricsTab(tab)} className={`lyrics-tab ${props.lyricsTab === tab ? "active" : ""}`}>{tab.toUpperCase()}안 <small>{tab === "a" ? "긴 가사" : "기본"}</small>{props.lyricsTab === tab && <CheckIcon className="size-4.5"/>}</button>)}</div>
         <pre className="result-scroll lyrics-pre mt-3">{selectedLyrics}</pre>
       </> : <><StaticCardTitle title="가사"/><EmptyCard text="구간명 없이 실제 가사만 표시됩니다." loading={isInitialLoading}/></>}
@@ -94,7 +101,7 @@ export function GeneratorResults(props: Props) {
     <div className={`publish-stack ${layoutStyles.publishStack}`}>
       <article className={`result-card compact-result-card title-card ${layoutStyles.titleCard}`}>
         {result ? <>
-          <CardHeader title="제목" copy={() => props.onCopy("titles", result.titles.join("\n"))} regenerate={() => props.onGenerate("titles")} busy={loading === "titles"}/>
+          <CardHeader title="제목" copy={() => props.onCopy("titles", result.titles.join("\n"))} regenerate={() => props.onGenerate("titles")} busy={loading === "titles"} disabled={props.regenerationBlocked} disabledLabel={disabledLabel}/>
           <ol className="title-list">{result.titles.map((title, index) => <li key={`${title}-${index}`} className="title-row">
             <span className="title-number">{index + 1}</span>
             <span className="title-text"><strong>{title}</strong></span>
@@ -108,7 +115,7 @@ export function GeneratorResults(props: Props) {
 
       <article className={`result-card compact-result-card hashtag-card ${layoutStyles.hashtagCard}`}>
         {result ? <>
-          <CardHeader title="해시태그" copy={() => props.onCopy("hashtags", result.hashtags.join(" "))} regenerate={() => props.onGenerate("hashtags")} busy={loading === "hashtags"}/>
+          <CardHeader title="해시태그" copy={() => props.onCopy("hashtags", result.hashtags.join(" "))} regenerate={() => props.onGenerate("hashtags")} busy={loading === "hashtags"} disabled={props.regenerationBlocked} disabledLabel={disabledLabel}/>
           <div className="hashtag-list">{result.hashtags.map((tag, index) => <button type="button" key={`${tag}-${index}`} onClick={() => props.onCopy(`tag-${index}`, tag)} className="hashtag">{tag}</button>)}</div>
         </> : <><StaticCardTitle title="해시태그"/><EmptyCard text="복사 가능한 해시태그 8개가 표시됩니다." loading={isInitialLoading}/></>}
       </article>

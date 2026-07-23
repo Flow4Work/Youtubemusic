@@ -1,18 +1,20 @@
 import { NextResponse } from "next/server";
 import { createMockResult } from "@/lib/mock";
 import { buildGenerationPrompt } from "@/lib/prompt";
-import { generateRequestSchema, generationResultSchema } from "@/lib/schemas";
-import type { GenerateRequest, GenerationResult } from "@/lib/types";
+import { generateRequestSchema, generationResultSchema, parseTargetResult } from "@/lib/schemas";
+import type { GenerateRequest, GenerationResult, GenerationTarget } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
+const DEFAULT_RETRY_AFTER_SECONDS = 10;
 
 class ProviderError extends Error {
   constructor(
     message: string,
     readonly status?: number,
+    readonly retryAfter?: number,
   ) {
     super(message);
   }
@@ -22,6 +24,7 @@ interface GroqFailure {
   model: string;
   message: string;
   status?: number;
+  retryAfter?: number;
 }
 
 function extractJson(text: string): unknown {
@@ -36,11 +39,20 @@ function extractJson(text: string): unknown {
   }
 }
 
+function parseRetryAfter(value: string | null): number | undefined {
+  if (!value) return undefined;
+  const seconds = Number(value);
+  return Number.isFinite(seconds) && seconds > 0 ? Math.ceil(seconds) : undefined;
+}
+
 async function postChatCompletion(options: {
   apiKey: string;
   model: string;
   prompt: string;
-}): Promise<GenerationResult> {
+  target: GenerationTarget;
+  temperature: number;
+  maxTokens: number;
+}): Promise<Record<string, unknown>> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 45_000);
 
@@ -58,15 +70,19 @@ async function postChatCompletion(options: {
           { role: "user", content: options.prompt },
         ],
         stream: false,
-        temperature: 0.75,
-        max_tokens: 5000,
+        temperature: options.temperature,
+        max_tokens: options.maxTokens,
       }),
       cache: "no-store",
       signal: controller.signal,
     });
 
     if (!response.ok) {
-      throw new ProviderError(`${options.model} 요청 실패`, response.status);
+      throw new ProviderError(
+        `${options.model} 요청 실패`,
+        response.status,
+        parseRetryAfter(response.headers.get("retry-after")),
+      );
     }
 
     const payload = (await response.json()) as {
@@ -75,7 +91,7 @@ async function postChatCompletion(options: {
     const content = payload.choices?.[0]?.message?.content;
     if (!content) throw new ProviderError(`${options.model} 응답 내용이 비어 있습니다.`);
 
-    return generationResultSchema.parse(extractJson(content));
+    return parseTargetResult(options.target, extractJson(content));
   } catch (error) {
     if (error instanceof ProviderError) throw error;
     if (error instanceof Error && error.name === "AbortError") {
@@ -100,17 +116,64 @@ function configuredModel(name: string, fallback: string): string {
   return process.env[name]?.trim() || fallback;
 }
 
+function modelsForTarget(target: GenerationTarget): string[] {
+  if (target === "lyrics") {
+    return [configuredModel("GROQ_LYRICS_MODEL", "openai/gpt-oss-120b")];
+  }
+
+  return Array.from(new Set([
+    configuredModel("GROQ_PRIMARY_MODEL", "openai/gpt-oss-120b"),
+    configuredModel("GROQ_SECONDARY_MODEL", "llama-3.3-70b-versatile"),
+    configuredModel("GROQ_FALLBACK_MODEL", "openai/gpt-oss-20b"),
+  ]));
+}
+
+function generationOptions(target: GenerationTarget): { temperature: number; maxTokens: number } {
+  if (target === "lyrics") return { temperature: 0.6, maxTokens: 2800 };
+  if (target === "all") return { temperature: 0.65, maxTokens: 5000 };
+  if (target === "style" || target === "titles") return { temperature: 0.7, maxTokens: 1400 };
+  if (target === "chords") return { temperature: 0.45, maxTokens: 1600 };
+  return { temperature: 0.55, maxTokens: 700 };
+}
+
 function failureStatus(failures: GroqFailure[]): number {
   if (failures.some((failure) => failure.status === 401 || failure.status === 403)) return 401;
   if (failures.length > 0 && failures.every((failure) => failure.status === 429)) return 429;
   return 502;
 }
 
+function mergeTargetResult(input: GenerateRequest, generated: Record<string, unknown>): GenerationResult {
+  if (input.target === "all") return generationResultSchema.parse(generated);
+  if (!input.existing) throw new Error("부분 재생성에 필요한 기존 결과가 없습니다.");
+
+  if (input.target === "chords") return generationResultSchema.parse({ ...input.existing, chords: generated.chords });
+  if (input.target === "style") return generationResultSchema.parse({
+    ...input.existing,
+    sunoStyle: generated.sunoStyle,
+    sunoStyleKorean: generated.sunoStyleKorean,
+  });
+  if (input.target === "lyrics") return generationResultSchema.parse({ ...input.existing, lyrics: generated.lyrics });
+  if (input.target === "titles") return generationResultSchema.parse({
+    ...input.existing,
+    titles: generated.titles,
+    titlesEnglish: generated.titlesEnglish,
+  });
+  return generationResultSchema.parse({ ...input.existing, hashtags: generated.hashtags });
+}
+
+function logGeneration(event: string, fields: Record<string, unknown>): void {
+  console.info(JSON.stringify({ event, ...fields }));
+}
+
 export async function POST(request: Request) {
+  const requestId = globalThis.crypto.randomUUID();
+  const requestStartedAt = Date.now();
   let parsed: GenerateRequest;
+
   try {
     parsed = generateRequestSchema.parse(await request.json());
   } catch {
+    logGeneration("generation.invalid_request", { requestId, durationMs: Date.now() - requestStartedAt });
     return NextResponse.json(
       { error: "요청 정보가 올바르지 않습니다. 가수와 대표곡을 다시 선택해 주세요." },
       { status: 400 },
@@ -119,6 +182,13 @@ export async function POST(request: Request) {
 
   const prompt = buildGenerationPrompt(parsed);
   const groqKey = process.env.GROQ_API_KEY?.trim();
+
+  logGeneration("generation.started", {
+    requestId,
+    target: parsed.target,
+    artistId: parsed.artist.id,
+    songId: parsed.song.id,
+  });
 
   if (!groqKey) {
     if (process.env.NODE_ENV === "development") {
@@ -129,25 +199,42 @@ export async function POST(request: Request) {
       });
     }
 
+    logGeneration("generation.failed", {
+      requestId,
+      target: parsed.target,
+      reason: "missing_api_key",
+      durationMs: Date.now() - requestStartedAt,
+    });
     return NextResponse.json(
       { error: "GROQ_API_KEY가 설정되지 않았습니다." },
       { status: 503 },
     );
   }
 
-  const models = [
-    configuredModel("GROQ_PRIMARY_MODEL", "openai/gpt-oss-120b"),
-    configuredModel("GROQ_FALLBACK_MODEL", "openai/gpt-oss-20b"),
-    configuredModel("GROQ_SECONDARY_MODEL", "llama-3.3-70b-versatile"),
-  ];
+  const models = modelsForTarget(parsed.target);
+  const options = generationOptions(parsed.target);
   const failures: GroqFailure[] = [];
 
   for (const model of models) {
+    const modelStartedAt = Date.now();
     try {
-      const result = await postChatCompletion({
+      const partialResult = await postChatCompletion({
         apiKey: groqKey,
         model,
         prompt,
+        target: parsed.target,
+        temperature: options.temperature,
+        maxTokens: options.maxTokens,
+      });
+      const result = mergeTargetResult(parsed, partialResult);
+
+      logGeneration("generation.succeeded", {
+        requestId,
+        target: parsed.target,
+        model,
+        durationMs: Date.now() - requestStartedAt,
+        modelDurationMs: Date.now() - modelStartedAt,
+        failedModels: failures.length,
       });
 
       return NextResponse.json({
@@ -158,13 +245,41 @@ export async function POST(request: Request) {
           : undefined,
       });
     } catch (error) {
-      failures.push({
+      const failure: GroqFailure = {
         model,
         message: providerMessage(error),
         status: error instanceof ProviderError ? error.status : undefined,
+        retryAfter: error instanceof ProviderError ? error.retryAfter : undefined,
+      };
+      failures.push(failure);
+      logGeneration("generation.model_failed", {
+        requestId,
+        target: parsed.target,
+        model,
+        status: failure.status ?? null,
+        reason: failure.message,
+        modelDurationMs: Date.now() - modelStartedAt,
       });
     }
   }
+
+  const status = failureStatus(failures);
+  const retryAfter = Math.max(
+    DEFAULT_RETRY_AFTER_SECONDS,
+    ...failures.map((failure) => failure.retryAfter ?? 0),
+  );
+
+  logGeneration("generation.failed", {
+    requestId,
+    target: parsed.target,
+    status,
+    durationMs: Date.now() - requestStartedAt,
+    failures: failures.map((failure) => ({
+      model: failure.model,
+      status: failure.status ?? null,
+      reason: failure.message,
+    })),
+  });
 
   return NextResponse.json(
     {
@@ -172,6 +287,9 @@ export async function POST(request: Request) {
         .map((failure) => `${failure.model}: ${failure.message}`)
         .join(" / ")}`,
     },
-    { status: failureStatus(failures) },
+    {
+      status,
+      headers: status === 429 ? { "Retry-After": String(retryAfter) } : undefined,
+    },
   );
 }
