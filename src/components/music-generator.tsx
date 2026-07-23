@@ -46,13 +46,16 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
   const [loading, setLoading] = useState<GenerationTarget | null>(null);
   const [durationEstimate, setDurationEstimate] = useState(30);
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
+  const [cooldownSeconds, setCooldownSeconds] = useState(0);
   const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null);
   const [copied, setCopied] = useState("");
   const [lyricsTab, setLyricsTab] = useState<"a" | "b">("a");
   const [simplified, setSimplified] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  const requestLockRef = useRef(false);
   const copyTimerRef = useRef<number | null>(null);
   const countdownTimerRef = useRef<number | null>(null);
+  const cooldownTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => setHistory(loadHistory()));
@@ -61,6 +64,7 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
       abortRef.current?.abort();
       if (copyTimerRef.current) window.clearTimeout(copyTimerRef.current);
       if (countdownTimerRef.current) window.clearInterval(countdownTimerRef.current);
+      if (cooldownTimerRef.current) window.clearInterval(cooldownTimerRef.current);
     };
   }, []);
 
@@ -84,7 +88,8 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
   const selectedArtist = useMemo(() => artists.find((artist) => artist.id === artistId) ?? null, [artists, artistId]);
   const selectedSong = useMemo(() => selectedArtist?.songs.find((song) => song.id === songId) ?? null, [selectedArtist, songId]);
   const displayChords = useMemo(() => !result ? null : simplified ? simplifyChordResult(result.chords) : result.chords, [result, simplified]);
-  const canGenerate = Boolean(selectedArtist && selectedSong && !loading);
+  const regenerationBlocked = Boolean(loading) || cooldownSeconds > 0;
+  const canGenerate = Boolean(selectedArtist && selectedSong && !regenerationBlocked);
   const providerName = result?.provider === "groq" ? "Groq" : "Mock";
 
   function chooseArtist(id: string) {
@@ -118,6 +123,23 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
     setRemainingSeconds(null);
   }
 
+  function startCooldown(seconds: number) {
+    if (cooldownTimerRef.current) window.clearInterval(cooldownTimerRef.current);
+    let remaining = Math.max(1, Math.ceil(seconds));
+    setCooldownSeconds(remaining);
+    setMessage({ text: `요청 한도를 초과했습니다. ${remaining}초 후 다시 시도해 주세요.`, error: true });
+
+    cooldownTimerRef.current = window.setInterval(() => {
+      remaining -= 1;
+      setCooldownSeconds(Math.max(0, remaining));
+      if (remaining <= 0) {
+        if (cooldownTimerRef.current) window.clearInterval(cooldownTimerRef.current);
+        cooldownTimerRef.current = null;
+        setMessage(null);
+      }
+    }, 1000);
+  }
+
   async function showCopied(key: string, text: string) {
     if (!text.trim()) return;
     try {
@@ -134,15 +156,21 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
   }
 
   async function generate(target: GenerationTarget) {
-    if (!selectedArtist || !selectedSong || loading) return;
+    if (!selectedArtist || !selectedSong || requestLockRef.current || cooldownSeconds > 0) return;
+    requestLockRef.current = true;
     const startedAt = Date.now();
-    const estimate = target === "all" ? durationEstimate : Math.max(10, Math.round(durationEstimate * 0.55));
+    const estimate = target === "all"
+      ? durationEstimate
+      : target === "lyrics"
+        ? Math.max(12, Math.round(durationEstimate * 0.5))
+        : Math.max(8, Math.round(durationEstimate * 0.35));
     startCountdown(estimate);
     setLoading(target);
     setMessage(null);
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
+
     try {
       const existing = result ? {
         chords: result.chords,
@@ -160,11 +188,17 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
         signal: controller.signal,
       });
       const data = await response.json() as GenerateResponse & { error?: string };
+
+      if (response.status === 429) {
+        const retryAfter = Number(response.headers.get("Retry-After")) || 10;
+        startCooldown(retryAfter);
+        return;
+      }
       if (!response.ok) {
-        if (response.status === 429) throw new Error("요청이 많습니다. 잠시 뒤 다시 시도해 주세요.");
         if (response.status === 401 || response.status === 403) throw new Error("API 인증 정보를 확인해 주세요.");
         throw new Error(data.error || "생성 요청에 실패했습니다.");
       }
+
       const merged = result ? mergeTarget(result, data.result, target) : data.result;
       const payload: GeneratedPayload = {
         ...merged,
@@ -191,6 +225,7 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
     } finally {
       stopCountdown();
       setLoading(null);
+      requestLockRef.current = false;
       abortRef.current = null;
     }
   }
@@ -218,8 +253,8 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
 
     <div className="studio-page">
       <div className="studio-layout">
-        <GeneratorSelection artists={filteredArtists} artistId={artistId} songId={songId} query={query} selectedArtist={selectedArtist} selectedSong={selectedSong} canGenerate={canGenerate} loadingTarget={loading} remainingSeconds={remainingSeconds} onQuery={setQuery} onArtist={chooseArtist} onSong={chooseSong} onGenerate={() => generate("all")}/>
-        <GeneratorResults result={result} chords={displayChords} loading={loading} simplified={simplified} lyricsTab={lyricsTab} copied={copied} providerName={providerName} onGenerate={generate} onCopy={showCopied} onTranspose={transpose} onSimplified={() => setSimplified((value) => !value)} onLyricsTab={setLyricsTab}/>
+        <GeneratorSelection artists={filteredArtists} artistId={artistId} songId={songId} query={query} selectedArtist={selectedArtist} selectedSong={selectedSong} canGenerate={canGenerate} loadingTarget={loading} remainingSeconds={remainingSeconds} cooldownSeconds={cooldownSeconds} onQuery={setQuery} onArtist={chooseArtist} onSong={chooseSong} onGenerate={() => generate("all")}/>
+        <GeneratorResults result={result} chords={displayChords} loading={loading} regenerationBlocked={regenerationBlocked} cooldownSeconds={cooldownSeconds} simplified={simplified} lyricsTab={lyricsTab} copied={copied} providerName={providerName} onGenerate={generate} onCopy={showCopied} onTranspose={transpose} onSimplified={() => setSimplified((value) => !value)} onLyricsTab={setLyricsTab}/>
       </div>
       {message && <div className={`status-message ${message.error ? "error" : "success"}`} role="status">{message.text}</div>}
     </div>
