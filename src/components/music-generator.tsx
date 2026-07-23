@@ -44,12 +44,15 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
   const [history, setHistory] = useState<GeneratedPayload[]>([]);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [loading, setLoading] = useState<GenerationTarget | null>(null);
+  const [durationEstimate, setDurationEstimate] = useState(30);
+  const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
   const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null);
   const [copied, setCopied] = useState("");
   const [lyricsTab, setLyricsTab] = useState<"a" | "b">("a");
   const [simplified, setSimplified] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const copyTimerRef = useRef<number | null>(null);
+  const countdownTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => setHistory(loadHistory()));
@@ -57,6 +60,7 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
       window.cancelAnimationFrame(frame);
       abortRef.current?.abort();
       if (copyTimerRef.current) window.clearTimeout(copyTimerRef.current);
+      if (countdownTimerRef.current) window.clearInterval(countdownTimerRef.current);
     };
   }, []);
 
@@ -66,6 +70,12 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
     window.addEventListener("keydown", close);
     return () => window.removeEventListener("keydown", close);
   }, [historyOpen]);
+
+  useEffect(() => {
+    if (!message || message.error) return;
+    const timer = window.setTimeout(() => setMessage(null), 2000);
+    return () => window.clearTimeout(timer);
+  }, [message]);
 
   const filteredArtists = useMemo(() => {
     const value = query.trim().toLowerCase();
@@ -90,6 +100,24 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
     setMessage(null);
   }
 
+  function startCountdown(estimate: number) {
+    if (countdownTimerRef.current) window.clearInterval(countdownTimerRef.current);
+    const startedAt = Date.now();
+    setRemainingSeconds(estimate);
+    countdownTimerRef.current = window.setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+      setRemainingSeconds(Math.max(0, estimate - elapsed));
+    }, 1000);
+  }
+
+  function stopCountdown() {
+    if (countdownTimerRef.current) {
+      window.clearInterval(countdownTimerRef.current);
+      countdownTimerRef.current = null;
+    }
+    setRemainingSeconds(null);
+  }
+
   async function showCopied(key: string, text: string) {
     if (!text.trim()) return;
     try {
@@ -107,6 +135,9 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
 
   async function generate(target: GenerationTarget) {
     if (!selectedArtist || !selectedSong || loading) return;
+    const startedAt = Date.now();
+    const estimate = target === "all" ? durationEstimate : Math.max(10, Math.round(durationEstimate * 0.55));
+    startCountdown(estimate);
     setLoading(target);
     setMessage(null);
     abortRef.current?.abort();
@@ -149,11 +180,16 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
       setResult(payload);
       setSimplified(false);
       setHistory((current) => prependHistory(payload, current));
+      if (target === "all") {
+        const elapsed = Math.max(1, Math.ceil((Date.now() - startedAt) / 1000));
+        setDurationEstimate(Math.min(60, Math.max(15, Math.round(elapsed * 1.15))));
+      }
       setMessage({ text: data.warning || `${targetLabel[target]} 생성이 완료되었습니다.`, error: false });
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") return;
       setMessage({ text: error instanceof Error ? error.message : "네트워크 오류가 발생했습니다.", error: true });
     } finally {
+      stopCountdown();
       setLoading(null);
       abortRef.current = null;
     }
@@ -182,7 +218,7 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
 
     <div className="studio-page">
       <div className="studio-layout">
-        <GeneratorSelection artists={filteredArtists} artistId={artistId} songId={songId} query={query} selectedArtist={selectedArtist} selectedSong={selectedSong} canGenerate={canGenerate} loadingTarget={loading} onQuery={setQuery} onArtist={chooseArtist} onSong={chooseSong} onGenerate={() => generate("all")}/>
+        <GeneratorSelection artists={filteredArtists} artistId={artistId} songId={songId} query={query} selectedArtist={selectedArtist} selectedSong={selectedSong} canGenerate={canGenerate} loadingTarget={loading} remainingSeconds={remainingSeconds} onQuery={setQuery} onArtist={chooseArtist} onSong={chooseSong} onGenerate={() => generate("all")}/>
         <GeneratorResults result={result} chords={displayChords} loading={loading} simplified={simplified} lyricsTab={lyricsTab} copied={copied} providerName={providerName} onGenerate={generate} onCopy={showCopied} onTranspose={transpose} onSimplified={() => setSimplified((value) => !value)} onLyricsTab={setLyricsTab}/>
       </div>
       {message && <div className={`status-message ${message.error ? "error" : "success"}`} role="status">{message.text}</div>}
