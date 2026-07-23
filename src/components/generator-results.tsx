@@ -67,7 +67,7 @@ export function GeneratorResults(props: Props) {
           <button type="button" className={`mini-button ${props.simplified ? "active" : ""}`} onClick={props.onSimplified}>쉬운 코드</button>
         </div>
         <div className="result-scroll mt-4 space-y-3">{Object.entries(chords.sections).filter(([, values]) => values.length > 0).map(([name, values]) => <div key={name} className="chord-section"><div className="flex items-center justify-between gap-3"><strong>{sectionLabel[name] ?? name}</strong><button type="button" onClick={() => props.onCopy(`section-${name}`, values.join(" | "))} className="section-copy-button"><CopyIcon className="size-4.5"/>{props.copied === `section-${name}` ? "완료" : "복사"}</button></div><p>{values.join(" | ")}</p></div>)}</div>
-      </> : <><StaticCardTitle eyebrow="01 · CHORD" title="코드"/><EmptyCard text="생성된 코드가 여기에 표시됩니다." loading={isInitialLoading}/></>}
+      </> : <><StaticCardTitle eyebrow="01 · CHORD" title="코드"/><div className="flex-1" aria-hidden="true"/></>}
     </article>
 
     <article className="result-card style-card">
