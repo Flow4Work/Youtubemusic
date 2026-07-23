@@ -37,17 +37,70 @@ export const chordResultSchema = z.object({
   bpm: z.number().int().min(30).max(240),
   timeSignature: z.string().min(1),
   sections: z.record(z.string(), z.array(z.string())),
+}).superRefine((value, context) => {
+  const entries = Object.entries(value.sections);
+  const nonEmptySections = entries.filter(([, chords]) => chords.length > 0);
+  const verse = entries.find(([name]) => /^verse$/iu.test(name))?.[1] ?? [];
+  const chorus = entries.find(([name]) => /^chorus$/iu.test(name))?.[1] ?? [];
+
+  if (nonEmptySections.length < 3) {
+    context.addIssue({ code: "custom", path: ["sections"], message: "코드는 최소 3개 이상의 구간이 필요합니다." });
+  }
+  if (verse.length === 0) {
+    context.addIssue({ code: "custom", path: ["sections", "verse"], message: "Verse 코드가 필요합니다." });
+  }
+  if (chorus.length === 0) {
+    context.addIssue({ code: "custom", path: ["sections", "chorus"], message: "Chorus 코드가 필요합니다." });
+  }
 });
 
-const lyricA = z.string().min(180).refine(
-  (text) => text.split("\n").filter((line) => line.trim().length > 0).length >= 24,
-  "A안은 실제 가사 24줄 이상이어야 합니다.",
-);
+const sectionHeaderPattern = /^\s*\[[^\]]+\]\s*$/u;
 
-const lyricB = z.string().min(120).refine(
-  (text) => text.split("\n").filter((line) => line.trim().length > 0).length >= 16,
-  "B안은 실제 가사 16줄 이상이어야 합니다.",
-);
+function lyricLineCount(text: string): number {
+  return text
+    .split("\n")
+    .filter((line) => line.trim().length > 0 && !sectionHeaderPattern.test(line))
+    .length;
+}
+
+function hasRequiredLyricSections(text: string): boolean {
+  return /\[Verse(?:\s*\d+)?\]/iu.test(text) && /\[(?:Final\s+)?Chorus\]/iu.test(text);
+}
+
+const lyricA = z.string().min(180)
+  .refine(hasRequiredLyricSections, "A안에는 [Verse]와 [Chorus] 구간명이 필요합니다.")
+  .refine(
+    (text) => {
+      const count = lyricLineCount(text);
+      return count >= 24 && count <= 30;
+    },
+    "A안은 구간명을 제외한 실제 가사 24~30줄이어야 합니다.",
+  );
+
+const lyricB = z.string().min(140)
+  .refine(hasRequiredLyricSections, "B안에는 [Verse]와 [Chorus] 구간명이 필요합니다.")
+  .refine(
+    (text) => {
+      const count = lyricLineCount(text);
+      return count >= 20 && count <= 26;
+    },
+    "B안은 구간명을 제외한 실제 가사 20~26줄이어야 합니다.",
+  );
+
+const legacyLyricsSchema = z.object({
+  a: z.string().min(1),
+  b: z.string().min(1),
+});
+
+function uniqueStrings(values: string[]): boolean {
+  return new Set(values.map((value) => value.trim().toLocaleLowerCase())).size === values.length;
+}
+
+const titlesSchema = z.array(z.string().min(1).max(40)).length(3)
+  .refine(uniqueStrings, "제목 3개는 서로 달라야 합니다.");
+
+const hashtagsSchema = z.array(z.string().regex(/^#[^\s#]+$/u, "해시태그는 #으로 시작하고 공백이 없어야 합니다.")).length(8)
+  .refine(uniqueStrings, "해시태그 8개는 서로 달라야 합니다.");
 
 export const lyricsResultSchema = z.object({
   lyrics: z.object({
@@ -57,17 +110,17 @@ export const lyricsResultSchema = z.object({
 });
 
 export const styleResultSchema = z.object({
-  sunoStyle: z.string().min(20),
-  sunoStyleKorean: z.string().min(20),
+  sunoStyle: z.string().min(180).max(1200),
+  sunoStyleKorean: z.string().min(100).max(1600),
 });
 
 export const titlesResultSchema = z.object({
-  titles: z.array(z.string().min(1)).length(3),
-  titlesEnglish: z.array(z.string().min(1)).length(3),
+  titles: titlesSchema,
+  titlesEnglish: titlesSchema,
 });
 
 export const hashtagsResultSchema = z.object({
-  hashtags: z.array(z.string().min(1)).length(8),
+  hashtags: hashtagsSchema,
 });
 
 export const chordsResultSchema = z.object({
@@ -76,12 +129,27 @@ export const chordsResultSchema = z.object({
 
 export const generationResultSchema = z.object({
   chords: chordResultSchema,
-  sunoStyle: z.string().min(20),
-  sunoStyleKorean: z.string().min(20),
+  sunoStyle: z.string().min(180).max(1200),
+  sunoStyleKorean: z.string().min(100).max(1600),
   lyrics: z.object({
     a: lyricA,
     b: lyricB,
   }),
+  titles: titlesSchema,
+  titlesEnglish: titlesSchema,
+  hashtags: hashtagsSchema,
+});
+
+export const existingGenerationResultSchema = z.object({
+  chords: z.object({
+    key: z.string().min(1),
+    bpm: z.number().int().min(30).max(240),
+    timeSignature: z.string().min(1),
+    sections: z.record(z.string(), z.array(z.string())),
+  }),
+  sunoStyle: z.string().min(1),
+  sunoStyleKorean: z.string().min(1),
+  lyrics: legacyLyricsSchema,
   titles: z.array(z.string().min(1)).length(3),
   titlesEnglish: z.array(z.string().min(1)).length(3),
   hashtags: z.array(z.string().min(1)).length(8),
@@ -91,7 +159,7 @@ export const generateRequestSchema = z.object({
   artist: artistSchema,
   song: songSchema,
   target: z.enum(["all", "chords", "style", "lyrics", "titles", "hashtags"]),
-  existing: generationResultSchema.optional(),
+  existing: existingGenerationResultSchema.optional(),
 }).superRefine((value, context) => {
   if (value.target !== "all" && !value.existing) {
     context.addIssue({
