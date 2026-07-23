@@ -72,6 +72,11 @@ const lyricB = z.string().min(140)
     "B안은 구간명을 제외한 실제 가사 20~26줄이어야 합니다.",
   );
 
+const legacyLyricsSchema = z.object({
+  a: z.string().min(1),
+  b: z.string().min(1),
+});
+
 export const lyricsResultSchema = z.object({
   lyrics: z.object({
     a: lyricA,
@@ -110,11 +115,21 @@ export const generationResultSchema = z.object({
   hashtags: z.array(z.string().min(1)).length(8),
 });
 
+export const existingGenerationResultSchema = z.object({
+  chords: chordResultSchema,
+  sunoStyle: z.string().min(1),
+  sunoStyleKorean: z.string().min(1),
+  lyrics: legacyLyricsSchema,
+  titles: z.array(z.string().min(1)).length(3),
+  titlesEnglish: z.array(z.string().min(1)).length(3),
+  hashtags: z.array(z.string().min(1)).length(8),
+});
+
 export const generateRequestSchema = z.object({
   artist: artistSchema,
   song: songSchema,
   target: z.enum(["all", "chords", "style", "lyrics", "titles", "hashtags"]),
-  existing: generationResultSchema.optional(),
+  existing: existingGenerationResultSchema.optional(),
 }).superRefine((value, context) => {
   if (value.target !== "all" && !value.existing) {
     context.addIssue({
