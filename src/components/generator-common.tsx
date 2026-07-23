@@ -1,15 +1,15 @@
 import type { ReactNode } from "react";
 import { CopyIcon, RefreshIcon } from "@/components/icons";
 
-export function ActionButton({ onClick, label, children, disabled = false }: { onClick: () => void; label: string; children: ReactNode; disabled?: boolean }) {
-  return <button type="button" onClick={onClick} disabled={disabled} aria-label={label} title={label} className="icon-button">{children}</button>;
+export function ActionButton({ onClick, label, children, disabled = false, copy = false }: { onClick: () => void; label: string; children: ReactNode; disabled?: boolean; copy?: boolean }) {
+  return <button type="button" onClick={onClick} disabled={disabled} aria-label={label} title={label} className={`icon-button ${copy ? "copy-action" : ""}`}>{children}</button>;
 }
 
 export function CardHeader({ eyebrow, title, copy, regenerate, busy }: { eyebrow: string; title: string; copy: () => void; regenerate: () => void; busy: boolean }) {
   return <div className="flex items-start justify-between gap-3">
-    <div><p className="text-xs font-semibold tracking-[0.14em] text-blue-600 uppercase">{eyebrow}</p><h3 className="mt-1 text-lg font-bold tracking-[-0.02em] text-slate-950">{title}</h3></div>
+    <div><p className="text-[11px] font-semibold tracking-[0.14em] text-blue-600 uppercase">{eyebrow}</p><h3 className="mt-1 text-[17px] font-bold tracking-[-0.02em] text-slate-950">{title}</h3></div>
     <div className="flex gap-1.5">
-      <ActionButton onClick={copy} label={`${title} 복사`}><CopyIcon className="size-4" /></ActionButton>
+      <ActionButton onClick={copy} label={`${title} 복사`} copy><CopyIcon className="size-4" /></ActionButton>
       <ActionButton onClick={regenerate} label={`${title} 다시 생성`} disabled={busy}><RefreshIcon className={`size-4 ${busy ? "animate-spin" : ""}`} /></ActionButton>
     </div>
   </div>;
