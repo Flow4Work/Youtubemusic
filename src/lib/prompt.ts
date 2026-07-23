@@ -25,17 +25,18 @@ export function buildGenerationPrompt(input: GenerateRequest): string {
 
 생성 규칙:
 1. 코드와 가사, 한국어 설명, 한국어 제목은 자연스러운 한국어 사용자 경험에 맞춥니다.
-2. sunoStyle은 Suno 입력창에 그대로 붙여 넣을 수 있도록 반드시 영어만 사용해 한 문단으로 작성합니다. 한국어 단어를 섞지 마세요.
-3. sunoStyleKorean에는 sunoStyle의 뜻을 빠짐없이 자연스러운 한국어로 설명합니다.
-4. 코드 진행은 초중급자가 연주 가능한 수준을 우선하되 너무 단조롭지 않게 만듭니다.
-5. 가사는 A안과 B안의 주제와 표현을 확실히 다르게 만듭니다.
-6. 가사 안에는 [Verse], Verse, Pre-Chorus, Chorus, Bridge, Outro 같은 구간명이나 설명을 절대 넣지 말고 실제로 부를 가사 문장만 넣습니다.
-7. A안은 B안보다 약 150% 길게 만듭니다. 권장 분량은 A안 30~36줄, B안 20~24줄입니다.
-8. 한국어 제목은 정확히 3개를 만들고 titlesEnglish에는 각 제목의 자연스러운 영어 제목을 같은 순서로 정확히 3개 만듭니다.
-9. 해시태그는 정확히 8개이며 각 항목은 #으로 시작합니다.
-10. sunoStyle에는 장르, 악기, 보컬 성격, 템포, 전개와 피해야 할 요소를 포함합니다.
-11. 기존 결과가 있고 생성 대상이 all이 아니라면 대상 필드만 새롭게 만들고 나머지 필드는 기존 값을 그대로 반환합니다. style 대상이면 sunoStyle과 sunoStyleKorean을 함께 갱신하고 titles 대상이면 titles와 titlesEnglish를 함께 갱신합니다.
-12. Markdown 코드블록이나 설명 문장을 붙이지 말고 JSON 객체 하나만 반환합니다.
+2. 전체 곡은 A안 기준 약 2분 안에 완성되는 짧고 밀도 있는 구성으로 설계합니다. 긴 인트로와 반복을 피하고, 코드 구간과 Suno 전개 설명도 약 2분 길이에 맞춥니다.
+3. sunoStyle은 Suno 입력창에 그대로 붙여 넣을 수 있도록 반드시 영어만 사용해 한 문단으로 작성합니다. 한국어 단어를 섞지 말고 approximately two minutes의 짧은 전개를 명시합니다.
+4. sunoStyleKorean에는 sunoStyle의 뜻을 빠짐없이 자연스러운 한국어로 설명합니다.
+5. 코드 진행은 초중급자가 연주 가능한 수준을 우선하되 너무 단조롭지 않게 만듭니다.
+6. 가사는 A안과 B안의 주제와 표현을 확실히 다르게 만듭니다.
+7. 가사 안에는 [Verse], Verse, Pre-Chorus, Chorus, Bridge, Outro 같은 구간명이나 설명을 절대 넣지 말고 실제로 부를 가사 문장만 넣습니다.
+8. A안은 약 2분 곡에 사용할 주 가사이며 B안보다 약 150% 길게 만듭니다. 권장 분량은 A안 30~36줄, B안 20~24줄입니다.
+9. 한국어 제목은 정확히 3개를 만들고 titlesEnglish에는 각 제목의 자연스러운 영어 제목을 같은 순서로 정확히 3개 만듭니다.
+10. 해시태그는 정확히 8개이며 각 항목은 #으로 시작합니다.
+11. sunoStyle에는 장르, 악기, 보컬 성격, 템포, 약 2분 전개와 피해야 할 요소를 포함합니다.
+12. 기존 결과가 있고 생성 대상이 all이 아니라면 대상 필드만 새롭게 만들고 나머지 필드는 기존 값을 그대로 반환합니다. style 대상이면 sunoStyle과 sunoStyleKorean을 함께 갱신하고 titles 대상이면 titles와 titlesEnglish를 함께 갱신합니다.
+13. Markdown 코드블록이나 설명 문장을 붙이지 말고 JSON 객체 하나만 반환합니다.
 
 반드시 아래 구조를 정확히 지키세요:
 {
@@ -52,10 +53,10 @@ export function buildGenerationPrompt(input: GenerateRequest): string {
       "outro": ["C", "G", "F", "C"]
     }
   },
-  "sunoStyle": "English-only Suno style prompt",
+  "sunoStyle": "English-only Suno style prompt for an approximately two-minute song",
   "sunoStyleKorean": "위 영어 스타일의 한국어 뜻",
   "lyrics": {
-    "a": "구간명 없이 실제 가사만 작성한 긴 A안",
+    "a": "구간명 없이 실제 가사만 작성한 약 2분용 긴 A안",
     "b": "구간명 없이 실제 가사만 작성한 B안"
   },
   "titles": ["한국어 제목1", "한국어 제목2", "한국어 제목3"],
