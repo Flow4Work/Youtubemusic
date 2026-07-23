@@ -1,15 +1,24 @@
 import { z } from "zod";
 
+export const songSourceSchema = z.object({
+  name: z.string().min(1),
+  url: z.string().min(1),
+});
+
 export const songSchema = z.object({
   id: z.string().min(1),
+  artistId: z.string().min(1).optional(),
+  artistName: z.string().min(1).optional(),
   title: z.string().min(1),
-  key: z.string().min(1),
-  bpm: z.number().int().min(30).max(240),
-  timeSignature: z.string().min(1),
+  key: z.string().min(1).nullable(),
+  bpm: z.number().int().min(30).max(240).nullable(),
+  timeSignature: z.string().min(1).nullable(),
   sections: z.record(z.string(), z.array(z.string())),
-  sourceName: z.string().min(1),
-  sourceUrl: z.string().min(1),
-  license: z.string().min(1),
+  sources: z.array(songSourceSchema).optional(),
+  verificationNote: z.string().optional(),
+  sourceName: z.string().min(1).optional(),
+  sourceUrl: z.string().min(1).optional(),
+  license: z.string().min(1).optional(),
   verified: z.boolean(),
   demo: z.boolean().optional(),
 });
