@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { GenerationTarget } from "@/lib/types";
 
 export const songSourceSchema = z.object({
   name: z.string().min(1),
@@ -38,13 +39,48 @@ export const chordResultSchema = z.object({
   sections: z.record(z.string(), z.array(z.string())),
 });
 
+const lyricA = z.string().min(180).refine(
+  (text) => text.split("\n").filter((line) => line.trim().length > 0).length >= 24,
+  "A안은 실제 가사 24줄 이상이어야 합니다.",
+);
+
+const lyricB = z.string().min(120).refine(
+  (text) => text.split("\n").filter((line) => line.trim().length > 0).length >= 16,
+  "B안은 실제 가사 16줄 이상이어야 합니다.",
+);
+
+export const lyricsResultSchema = z.object({
+  lyrics: z.object({
+    a: lyricA,
+    b: lyricB,
+  }),
+});
+
+export const styleResultSchema = z.object({
+  sunoStyle: z.string().min(20),
+  sunoStyleKorean: z.string().min(20),
+});
+
+export const titlesResultSchema = z.object({
+  titles: z.array(z.string().min(1)).length(3),
+  titlesEnglish: z.array(z.string().min(1)).length(3),
+});
+
+export const hashtagsResultSchema = z.object({
+  hashtags: z.array(z.string().min(1)).length(8),
+});
+
+export const chordsResultSchema = z.object({
+  chords: chordResultSchema,
+});
+
 export const generationResultSchema = z.object({
   chords: chordResultSchema,
   sunoStyle: z.string().min(20),
   sunoStyleKorean: z.string().min(20),
   lyrics: z.object({
-    a: z.string().min(80),
-    b: z.string().min(60),
+    a: lyricA,
+    b: lyricB,
   }),
   titles: z.array(z.string().min(1)).length(3),
   titlesEnglish: z.array(z.string().min(1)).length(3),
@@ -56,4 +92,21 @@ export const generateRequestSchema = z.object({
   song: songSchema,
   target: z.enum(["all", "chords", "style", "lyrics", "titles", "hashtags"]),
   existing: generationResultSchema.optional(),
+}).superRefine((value, context) => {
+  if (value.target !== "all" && !value.existing) {
+    context.addIssue({
+      code: "custom",
+      path: ["existing"],
+      message: "부분 재생성에는 기존 결과가 필요합니다.",
+    });
+  }
 });
+
+export function parseTargetResult(target: GenerationTarget, value: unknown): Record<string, unknown> {
+  if (target === "all") return generationResultSchema.parse(value);
+  if (target === "chords") return chordsResultSchema.parse(value);
+  if (target === "style") return styleResultSchema.parse(value);
+  if (target === "lyrics") return lyricsResultSchema.parse(value);
+  if (target === "titles") return titlesResultSchema.parse(value);
+  return hashtagsResultSchema.parse(value);
+}
