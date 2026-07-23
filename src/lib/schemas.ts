@@ -41,11 +41,13 @@ export const chordResultSchema = z.object({
 export const generationResultSchema = z.object({
   chords: chordResultSchema,
   sunoStyle: z.string().min(20),
+  sunoStyleKorean: z.string().min(20),
   lyrics: z.object({
-    a: z.string().min(40),
-    b: z.string().min(40),
+    a: z.string().min(80),
+    b: z.string().min(60),
   }),
   titles: z.array(z.string().min(1)).length(3),
+  titlesEnglish: z.array(z.string().min(1)).length(3),
   hashtags: z.array(z.string().min(1)).length(8),
 });
 
