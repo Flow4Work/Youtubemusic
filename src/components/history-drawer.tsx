@@ -13,7 +13,7 @@ interface Props {
 
 export function HistoryDrawer({ open, history, onClose, onLoad, onRemove, onClear }: Props) {
   if (!open) return null;
-  return <div className="fixed inset-0 z-50 bg-slate-950/25 backdrop-blur-[2px]" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+  return <div className="fixed inset-0 z-50 bg-slate-950/25 backdrop-blur-[2px]" role="presentation">
     <aside className="absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-white shadow-2xl" role="dialog" aria-modal="true" aria-label="최근 결과">
       <div className="flex h-16 items-center justify-between border-b border-slate-200 px-5"><div><h2 className="text-lg font-extrabold text-slate-950">최근 결과</h2><p className="text-xs text-slate-500">최대 20개, 현재 브라우저에만 저장</p></div><ActionButton onClick={onClose} label="최근 결과 닫기"><CloseIcon className="size-5"/></ActionButton></div>
       <div className="flex-1 overflow-y-auto p-4">
