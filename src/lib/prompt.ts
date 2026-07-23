@@ -16,9 +16,9 @@ export function buildGenerationPrompt(input: GenerateRequest): string {
 선택 정보:
 - 아티스트: ${input.artist.name}
 - 참고곡: ${song.title}
-- 참고 Key: ${song.key}
-- 참고 BPM: ${song.bpm}
-- 박자: ${song.timeSignature}
+- 참고 Key: ${song.key ?? "미확인"}
+- 참고 BPM: ${song.bpm ?? "미확인"}
+- 박자: ${song.timeSignature ?? "미확인"}
 - 참고 구간별 코드: ${referenceSections}
 - 이번 생성 대상: ${input.target}
 - 기존 결과: ${existing}
