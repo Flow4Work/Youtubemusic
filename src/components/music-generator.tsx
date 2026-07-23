@@ -45,7 +45,10 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
   const [simplified, setSimplified] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
-  useEffect(() => { setHistory(loadHistory()); return () => abortRef.current?.abort(); }, []);
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => setHistory(loadHistory()));
+    return () => { window.cancelAnimationFrame(frame); abortRef.current?.abort(); };
+  }, []);
   useEffect(() => {
     if (!historyOpen) return;
     const close = (event: KeyboardEvent) => { if (event.key === "Escape") setHistoryOpen(false); };
