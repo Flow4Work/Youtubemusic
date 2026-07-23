@@ -1,23 +1,27 @@
 .resultsGrid {
-  grid-template-rows: minmax(0, .72fr) minmax(0, 1.28fr) !important;
-}
-
-.codePosition {
-  grid-column: 1 !important;
-  grid-row: 2 !important;
+  grid-template-rows: repeat(10, minmax(0, 1fr)) !important;
 }
 
 .lyricsPosition {
   grid-column: 1 !important;
-  grid-row: 1 !important;
+  grid-row: 1 / 8 !important;
 }
 
-.publishStack {
-  grid-template-rows: minmax(0, 1.55fr) minmax(0, .45fr) !important;
+.codePosition {
+  grid-column: 1 !important;
+  grid-row: 8 / 11 !important;
 }
 
 .styleCompact {
+  grid-column: 2 !important;
+  grid-row: 1 / 4 !important;
   padding-bottom: 14px;
+}
+
+.publishStack {
+  grid-column: 2 !important;
+  grid-row: 4 / 11 !important;
+  grid-template-rows: minmax(0, 1.1fr) minmax(0, .9fr) !important;
 }
 
 .titleCard :global(.title-row) {
@@ -30,13 +34,20 @@
   font-size: 17px;
 }
 
+.hashtagCard :global(.hashtag-list) {
+  align-content: flex-start;
+  padding-top: 4px;
+}
+
 @media (max-width: 767px) {
   .resultsGrid {
     grid-template-rows: none !important;
   }
 
   .codePosition,
-  .lyricsPosition {
+  .lyricsPosition,
+  .styleCompact,
+  .publishStack {
     grid-column: 1 !important;
     grid-row: auto !important;
   }
