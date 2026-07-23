@@ -1,0 +1,168 @@
+{
+  "id": "sung-si-kyung",
+  "name": "성시경",
+  "description": "검수된 실제 곡 데이터",
+  "songs": [
+    {
+      "id": "sung-si-kyung-every-moment-of-you",
+      "artistId": "sung-si-kyung",
+      "artistName": "성시경",
+      "title": "너의 모든 순간",
+      "key": "Bb major → B major",
+      "bpm": 70,
+      "timeSignature": "4/4",
+      "sections": {
+        "intro": [],
+        "verse": [],
+        "preChorus": [],
+        "chorus": [],
+        "bridge": [],
+        "finalChorus": []
+      },
+      "sources": [
+        {
+          "name": "악보바다 원키 악보",
+          "url": "https://www.akbobada.com/musicDetail.html?musicID=57053&partTabGubun=M"
+        },
+        {
+          "name": "뮤직스코어 원키 악보",
+          "url": "https://www.musicscore.co.kr/m_score/score_detail.asp?s_rndidx=7JZOsBphaWbP2014021260327"
+        },
+        {
+          "name": "Chordify 원곡 분석",
+          "url": "https://chordify.net/chords/sung-si-kyung-songs/neoui-modeun-sungan-every-moment-of-you-chords"
+        },
+        {
+          "name": "ChordU 원곡 분석",
+          "url": "https://chordu.com/chords-tabs--sung-shi-kyung-every-moment-of-you-%EB%84%88%EC%9D%98-%EB%AA%A8%EB%93%A0-%EC%88%9C%EA%B0%84-ywcfts-ost-hangul-romanized-english-sub-lyrics-id_BciTZBx5YD0"
+        },
+        {
+          "name": "SongBPM 원곡 분석",
+          "url": "https://songbpm.com/%40sung-si-kyung/every-moment-of-you-neoyi-modeun-sungan-JhJShexoEQ"
+        },
+        {
+          "name": "GitHub 정확 곡명 검색",
+          "url": "https://github.com/search?q=%22%EC%84%B1%EC%8B%9C%EA%B2%BD%22+%22%EB%84%88%EC%9D%98+%EB%AA%A8%EB%93%A0+%EC%88%9C%EA%B0%84%22+chord&type=code"
+        }
+      ],
+      "verified": true,
+      "verificationNote": "악보바다는 원곡이 Bb에서 B major로 반음 상승한다고 명시하고 뮤직스코어도 시작 조성을 Bb로 표시한다. SongBPM은 Bb major, 140 BPM, 4박자를 제시하므로 하프타임 70 BPM을 저장했다. Chordify와 ChordU에서도 Bb 조성의 코드와 후반 B major 전조가 확인된다. 공개 텍스트 코드표들은 C 코드형 등 조옮김 자료가 섞여 있어 섹션 작성에는 사용하지 않았다."
+    },
+    {
+      "id": "sung-si-kyung-two-people",
+      "artistId": "sung-si-kyung",
+      "artistName": "성시경",
+      "title": "두 사람",
+      "key": "A major",
+      "bpm": 71,
+      "timeSignature": "4/4",
+      "sections": {
+        "intro": [],
+        "verse": [
+          "A - E/G# - Em/G - F#7 - D - Dm6",
+          "A - G#m11 - C#7 - F#m - F#m/F - F#m/E - B7 - Bm7 - E9"
+        ],
+        "preChorus": [],
+        "chorus": [
+          "A - G#m11 - C#7 - C#m7/G - F#7",
+          "DMaj7 - DM6 - G#m11 - C#7 - F#m - F#/E - DMaj7 - A/C#",
+          "Bm7 - E7sus4 - A"
+        ],
+        "bridge": [
+          "C#m7/G - F#7 - Bm7 - Dm9 - E7sus4 - A",
+          "C#m7/G - F#7 - Bm7 - G#m11 - C#7 - F#m - B7 - Bm7"
+        ],
+        "finalChorus": [
+          "A - G#m11 - C#7 - C#m7/G - F#7",
+          "DMaj7 - DM6 - G#m11 - C#7 - F#m - F#/E - DMaj7 - A/C#",
+          "Bm7 - E7sus4 - D - A/C# - Am/C - Bm7 - E7sus4 - A"
+        ]
+      },
+      "sources": [
+        {
+          "name": "악보바다 원키 악보",
+          "url": "https://www.akbobada.com/musicDetail.html?musicID=29282&partTabGubun=P"
+        },
+        {
+          "name": "타르테 원키 코드 악보",
+          "url": "https://tartae.tistory.com/entry/%EC%84%B1%EC%8B%9C%EA%B2%BD-%EB%91%90-%EC%82%AC%EB%9E%8C-%EC%BD%94%EB%93%9C%EC%95%85%EB%B3%B4"
+        },
+        {
+          "name": "SongBPM 원곡 분석",
+          "url": "https://songbpm.com/%40sung-si-kyung/du-saram"
+        },
+        {
+          "name": "GitHub 정확 곡명 검색",
+          "url": "https://github.com/search?q=%22%EC%84%B1%EC%8B%9C%EA%B2%BD%22+%22%EB%91%90+%EC%82%AC%EB%9E%8C%22+chord&type=code"
+        }
+      ],
+      "verified": true,
+      "verificationNote": "악보바다와 타르테 코드표가 원키 A major로 일치한다. SongBPM도 A major, 142 BPM, 4박자로 분석하며 하프타임인 71 BPM을 저장했다. 악보바다의 통기타 악보는 2프렛 카포를 사용하지만 표시된 실제 원키는 A major이며, 섹션 코드는 실제 음높이로 작성된 타르테 코드표를 사용했다."
+    },
+    {
+      "id": "sung-si-kyung-on-the-street",
+      "artistId": "sung-si-kyung",
+      "artistName": "성시경",
+      "title": "거리에서",
+      "key": "G major",
+      "bpm": 132,
+      "timeSignature": null,
+      "sections": {
+        "intro": [
+          "CMaj7 - Bm7 - CMaj7 - D7"
+        ],
+        "verse": [
+          "G - Gaug - C - G - Em - G/D - A/C# - D7",
+          "G - F/G - C - Cm/Eb - G - D/F# - Em - Am7 - D7 - G"
+        ],
+        "preChorus": [
+          "Em - Bm/D - C - G/B - Am - A/C# - D7",
+          "C - D/C - Bm - Em - Am - A/C# - D7"
+        ],
+        "chorus": [
+          "G - D/F# - Em - G/D - C - G/B - Am - D7",
+          "G - D/F# - Em - G/D - C - G/B - Am - D11"
+        ],
+        "bridge": [
+          "G - B7/F# - Em - Am - A/C# - D7"
+        ],
+        "finalChorus": [
+          "G - D/F# - Em - G/D - C - G/B - Am - D7",
+          "G - D/F# - Em - G/D - C - G/B - Am - D11"
+        ]
+      },
+      "sources": [
+        {
+          "name": "악보바다 원키 악보",
+          "url": "https://www.akbobada.com/musicDetail.html?musicID=22629&partTabGubun=P"
+        },
+        {
+          "name": "Play Guitar 원키 코드 악보",
+          "url": "https://playguitar.tistory.com/199"
+        },
+        {
+          "name": "타르테 코드 악보",
+          "url": "https://tartae.tistory.com/entry/%EC%84%B1%EC%8B%9C%EA%B2%BD-%EA%B1%B0%EB%A6%AC%EC%97%90%EC%84%9C-%EC%BD%94%EB%93%9C%EC%95%85%EB%B3%B4"
+        },
+        {
+          "name": "코드홀릭 코드 악보",
+          "url": "https://chordholic.tistory.com/158"
+        },
+        {
+          "name": "Chordify 원곡 분석",
+          "url": "https://chordify.net/chords/seongsigyeong-songs/geolieseo-chords"
+        },
+        {
+          "name": "SongBPM 성시경 곡 분석",
+          "url": "https://songbpm.com/%40sung-si-kyung?after=6re466as7jq0ioucooyxla-f2fr6"
+        },
+        {
+          "name": "GitHub 정확 곡명 검색",
+          "url": "https://github.com/search?q=%22%EC%84%B1%EC%8B%9C%EA%B2%BD%22+%22%EA%B1%B0%EB%A6%AC%EC%97%90%EC%84%9C%22+chord&type=code"
+        }
+      ],
+      "verified": true,
+      "verificationNote": "악보바다, Play Guitar, Chordify와 SongBPM이 원키 G major로 일치한다. Play Guitar, 타르테와 코드홀릭도 G-Gaug-C-G 및 G-D/F#-Em-C-G/B-Am-D7 중심 진행을 공통으로 제시한다. BPM은 Chordify 130, SongBPM 132로 2 BPM 차이가 있으며 SongBPM의 132를 저장했다. 박자표는 독립된 원곡 악보 정보에서 명시적으로 확인되지 않아 null로 두었다."
+    }
+  ]
+}
