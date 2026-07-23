@@ -45,7 +45,6 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [loading, setLoading] = useState<GenerationTarget | null>(null);
   const [durationEstimate, setDurationEstimate] = useState(30);
-  const [activeEstimate, setActiveEstimate] = useState(30);
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
   const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null);
   const [copied, setCopied] = useState("");
@@ -53,6 +52,7 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
   const [simplified, setSimplified] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const copyTimerRef = useRef<number | null>(null);
+  const countdownTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => setHistory(loadHistory()));
@@ -60,6 +60,7 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
       window.cancelAnimationFrame(frame);
       abortRef.current?.abort();
       if (copyTimerRef.current) window.clearTimeout(copyTimerRef.current);
+      if (countdownTimerRef.current) window.clearInterval(countdownTimerRef.current);
     };
   }, []);
 
@@ -69,20 +70,6 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
     window.addEventListener("keydown", close);
     return () => window.removeEventListener("keydown", close);
   }, [historyOpen]);
-
-  useEffect(() => {
-    if (!loading) {
-      setRemainingSeconds(null);
-      return;
-    }
-    const startedAt = Date.now();
-    setRemainingSeconds(activeEstimate);
-    const timer = window.setInterval(() => {
-      const elapsed = Math.floor((Date.now() - startedAt) / 1000);
-      setRemainingSeconds(Math.max(0, activeEstimate - elapsed));
-    }, 1000);
-    return () => window.clearInterval(timer);
-  }, [loading, activeEstimate]);
 
   useEffect(() => {
     if (!message || message.error) return;
@@ -113,6 +100,24 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
     setMessage(null);
   }
 
+  function startCountdown(estimate: number) {
+    if (countdownTimerRef.current) window.clearInterval(countdownTimerRef.current);
+    const startedAt = Date.now();
+    setRemainingSeconds(estimate);
+    countdownTimerRef.current = window.setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+      setRemainingSeconds(Math.max(0, estimate - elapsed));
+    }, 1000);
+  }
+
+  function stopCountdown() {
+    if (countdownTimerRef.current) {
+      window.clearInterval(countdownTimerRef.current);
+      countdownTimerRef.current = null;
+    }
+    setRemainingSeconds(null);
+  }
+
   async function showCopied(key: string, text: string) {
     if (!text.trim()) return;
     try {
@@ -132,7 +137,7 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
     if (!selectedArtist || !selectedSong || loading) return;
     const startedAt = Date.now();
     const estimate = target === "all" ? durationEstimate : Math.max(10, Math.round(durationEstimate * 0.55));
-    setActiveEstimate(estimate);
+    startCountdown(estimate);
     setLoading(target);
     setMessage(null);
     abortRef.current?.abort();
@@ -184,6 +189,7 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
       if (error instanceof Error && error.name === "AbortError") return;
       setMessage({ text: error instanceof Error ? error.message : "네트워크 오류가 발생했습니다.", error: true });
     } finally {
+      stopCountdown();
       setLoading(null);
       abortRef.current = null;
     }
