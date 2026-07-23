@@ -1,1 +1,174 @@
-{"id":"lee-sun-hee","name":"이선희","description":"검수된 실제 곡 데이터","songs":[{"id":"lee-sun-hee-to-j","artistId":"lee-sun-hee","artistName":"이선희","title":"J에게","key":"B major","bpm":83,"timeSignature":null,"sections":{"intro":[],"verse":[],"preChorus":[],"chorus":[],"bridge":[],"finalChorus":[]},"sources":[{"name":"Chordify 원곡 분석","url":"https://chordify.net/chords/j-hj-lee"},{"name":"KBS 가요톱10 이선희 원곡 무대","url":"https://www.youtube.com/watch?v=GpgRMHBXJ6s"},{"name":"GitHub 정확 곡명 검색","url":"https://github.com/search?q=%22%EC%9D%B4%EC%84%A0%ED%9D%AC%22+%22J%EC%97%90%EA%B2%8C%22+chord&type=code"}],"verified":false,"verificationNote":"Chordify는 B major와 83 BPM을 제시하지만 음원이 428Hz 비표준 튜닝으로 분석됐다. 원키 상태의 섹션별 텍스트 코드표를 두 출처에서 확인하지 못해 배열을 비웠다. GitHub에서도 검증 가능한 코드 진행 자료를 찾지 못했다."},{"id":"lee-sun-hee-fate","artistId":"lee-sun-hee","artistName":"이선희","title":"인연","key":"F# minor / A major","bpm":70,"timeSignature":null,"sections":{"intro":[],"verse":["A - F#m - C#m - F#m - C#m - D - E","F#m - C#m - D - A - D - E7 - A"],"preChorus":[],"chorus":["D - E - F#m - D - E - F#m","D - E - F#m - D - G#m7 - C#","D - E - F#m - D - E - F#m"],"bridge":[],"finalChorus":["D - E - F#m - D - E - F#m"]},"sources":[{"name":"Play Guitar 코드 악보","url":"https://playguitar.tistory.com/200"},{"name":"타르테 코드 악보","url":"https://tartae.tistory.com/entry/%EC%9D%B4%EC%84%A0%ED%9D%AC-%EC%9D%B8%EC%97%B0-%EC%BD%94%EB%93%9C%EC%95%85%EB%B3%B4"},{"name":"Chordify 원곡 분석","url":"https://chordify.net/chords/iseonhui-songs/in-yeon-chords"},{"name":"쉬운 코드 자료실","url":"https://www.ezcho.com/chop/4535"},{"name":"GitHub 정확 곡명 검색","url":"https://github.com/search?q=%22%EC%9D%B4%EC%84%A0%ED%9D%AC%22+%22%EC%9D%B8%EC%97%B0%22+chord&type=code"}],"verified":false,"verificationNote":"두 텍스트 코드표의 핵심 진행은 일치한다. 코드표는 A major로 표기하지만 Chordify는 관계조인 F# minor로 분석한다. 두 표기가 조성상 밀접하지만 원키 명칭이 일치하지 않아 verified는 false로 두었다. BPM은 코드 자료실과 Chordify가 70으로 일치한다."},{"id":"lee-sun-hee-meet-him-among-them","artistId":"lee-sun-hee","artistName":"이선희","title":"그중에 그대를 만나","key":"Ab major","bpm":null,"timeSignature":null,"sections":{"intro":[],"verse":["Ab - Bbm - Db - Eb - Ab"],"preChorus":[],"chorus":["Ab - Bbm - Db - Eb - Ab"],"bridge":["Fm - Cm - Db - Eb - Ab","B - Gb - E - Eb"],"finalChorus":["Ab - Bbm - Db - Eb - Ab","Bbm - Eb - Ab"]},"sources":[{"name":"쉬운 코드 자료실","url":"https://www.ezcho.com/chop/3215"},{"name":"타르테 코드 악보","url":"https://tartae.tistory.com/entry/%EC%9D%B4%EC%84%A0%ED%9D%AC-%EA%B7%B8-%EC%A4%91%EC%97%90-%EA%B7%B8%EB%8C%80%EB%A5%BC-%EB%A7%8C%EB%82%98-%EC%BD%94%EB%93%9C%EC%95%85%EB%B3%B4"},{"name":"GitHub 정확 곡명 검색","url":"https://github.com/search?q=%22%EC%9D%B4%EC%84%A0%ED%9D%AC%22+%22%EA%B7%B8%EC%A4%91%EC%97%90+%EA%B7%B8%EB%8C%80%EB%A5%BC+%EB%A7%8C%EB%82%98%22+chord&type=code"}],"verified":false,"verificationNote":"코드 자료실은 원키 Ab와 1카포를 명시하고 타르테는 G 코드형을 제공한다. 섹션에는 1카포 적용 후 실제 음높이로 변환한 코드를 저장했다. 독립적인 두 번째 원키 코드표와 정확한 BPM을 확인하지 못해 verified는 false다."}]}
+{
+  "id": "lee-sun-hee",
+  "name": "이선희",
+  "description": "검수된 실제 곡 데이터",
+  "songs": [
+    {
+      "id": "lee-sun-hee-fate",
+      "artistId": "lee-sun-hee",
+      "artistName": "이선희",
+      "title": "인연",
+      "key": "F# minor",
+      "bpm": 70,
+      "timeSignature": null,
+      "sections": {
+        "intro": [],
+        "verse": [
+          "A - F#m - C#m - F#m - C#m - D - E",
+          "F#m - C#m - D - A - D - E7 - A"
+        ],
+        "preChorus": [],
+        "chorus": [
+          "D - E - F#m - D - E - F#m",
+          "D - E - F#m - D - G#m7 - C#",
+          "D - E - F#m - D - E - F#m",
+          "D - E - F#m - D - E - F#m"
+        ],
+        "bridge": [],
+        "finalChorus": [
+          "D - E - F#m - D - E - F#m",
+          "D - E - F#m - D - G#m7 - C#",
+          "D - E - F#m - D - E - F#m"
+        ]
+      },
+      "sources": [
+        {
+          "name": "악보바다 원키 악보",
+          "url": "https://www.akbobada.com/musicDetail.html?musicID=29138"
+        },
+        {
+          "name": "Chordify 이선희 원곡 분석",
+          "url": "https://chordify.net/chords/iseonhui-songs/in-yeon-chords"
+        },
+        {
+          "name": "Play Guitar 코드 악보",
+          "url": "https://playguitar.tistory.com/200"
+        },
+        {
+          "name": "타르테 코드 악보",
+          "url": "https://tartae.tistory.com/entry/%EC%9D%B4%EC%84%A0%ED%9D%AC-%EC%9D%B8%EC%97%B0-%EC%BD%94%EB%93%9C%EC%95%85%EB%B3%B4"
+        },
+        {
+          "name": "GitHub 정확 곡명 검색",
+          "url": "https://github.com/search?q=%22%EC%9D%B4%EC%84%A0%ED%9D%AC%22+%22%EC%9D%B8%EC%97%B0%22+chord&type=code"
+        }
+      ],
+      "verified": true,
+      "verificationNote": "악보바다는 원키를 F# minor로 명시하고 Chordify도 F# minor, 70 BPM으로 분석한다. Chordify가 제시한 Dmaj7-E-F#m-A 중심 코드와 Play Guitar의 D-E-F#m-A 중심 진행이 일치한다. 일부 코드표는 관계장조인 A major로 표기하지만 실제 코드 음높이는 동일하다. 타르테의 G 코드형 자료는 조옮김 자료이므로 섹션 작성에는 사용하지 않았다. 박자표는 신뢰할 수 있는 원곡 악보 정보에서 확인되지 않아 null로 두었다."
+    },
+    {
+      "id": "lee-sun-hee-i-always-miss-you",
+      "artistId": "lee-sun-hee",
+      "artistName": "이선희",
+      "title": "나 항상 그대를",
+      "key": "G major → A major",
+      "bpm": 120,
+      "timeSignature": null,
+      "sections": {
+        "intro": [
+          "G - Em - C - D7 - G - Amaj7 - D7 - G"
+        ],
+        "verse": [
+          "G - Bm - Em - Eb - D7",
+          "G - Bm - C - D - G"
+        ],
+        "preChorus": [],
+        "chorus": [
+          "B7 - Em - C - D7",
+          "B7 - Em - C - D7 - G"
+        ],
+        "bridge": [],
+        "finalChorus": [
+          "C#7 - F#m - D - E",
+          "C#7 - F#m - D - E - A"
+        ]
+      },
+      "sources": [
+        {
+          "name": "악보바다 원키 악보",
+          "url": "https://www.akbobada.com/musicDetail.html?musicID=29253"
+        },
+        {
+          "name": "상어오브뮤직 원키 악보 정보",
+          "url": "https://sangeomusic.com/product/%EB%82%98-%ED%95%AD%EC%83%81-%EA%B7%B8%EB%8C%80%EB%A5%BC-%EC%9D%B4%EC%84%A0%ED%9D%AC/"
+        },
+        {
+          "name": "타르테 코드 악보",
+          "url": "https://tartae.tistory.com/entry/%EC%9D%B4%EC%84%A0%ED%9D%AC-%EB%82%98-%ED%95%AD%EC%83%81-%EA%B7%B8%EB%8C%80%EB%A5%BC-%EC%BD%94%EB%93%9C%EC%95%85%EB%B3%B4"
+        },
+        {
+          "name": "SongBPM 이선희 원곡 분석",
+          "url": "https://songbpm.com/%40iseonhyi/na-hangsang-geudaereul-4kqNEHHivq"
+        },
+        {
+          "name": "Chordify 이선희 라이브 코드 분석",
+          "url": "https://chordify.net/chords/iseonhui-songs/na-hangsang-geudaeleul-chords"
+        },
+        {
+          "name": "GitHub 정확 곡명 검색",
+          "url": "https://github.com/search?q=%22%EC%9D%B4%EC%84%A0%ED%9D%AC%22+%22%EB%82%98+%ED%95%AD%EC%83%81+%EA%B7%B8%EB%8C%80%EB%A5%BC%22+chord&type=code"
+        }
+      ],
+      "verified": true,
+      "verificationNote": "악보바다와 상어오브뮤직이 원곡의 G major에서 A major로 올라가는 전조를 동일하게 명시한다. 타르테의 G-Bm-Em-Eb-D7 및 B7-Em-C-D7 진행은 Chordify 타임라인의 핵심 코드와 일치하며, Chordify에서도 후반 A-F#m-D-E-C#7 진행이 확인된다. BPM은 이선희 스튜디오 음원을 대상으로 한 SongBPM의 120을 사용했다. Chordify의 79 BPM 자료는 2014년 라이브 음원이므로 원곡 BPM 검증에서는 제외했다. 박자표는 분석 자료가 서로 불명확해 null로 두었다."
+    },
+    {
+      "id": "lee-sun-hee-meet-him-among-them",
+      "artistId": "lee-sun-hee",
+      "artistName": "이선희",
+      "title": "그 중에 그대를 만나",
+      "key": "Ab major",
+      "bpm": 65,
+      "timeSignature": null,
+      "sections": {
+        "intro": [],
+        "verse": [
+          "Ab - Bbm - Db - Eb - Ab",
+          "Ab - Bbm - Db - Eb - Ab"
+        ],
+        "preChorus": [],
+        "chorus": [
+          "Ab - Bbm - Db - Eb - Ab",
+          "Ab - Bbm - Db - Eb - Ab"
+        ],
+        "bridge": [
+          "Fm - Cm - Db - Eb - Ab",
+          "B - Gb - E - Eb"
+        ],
+        "finalChorus": [
+          "Ab - Bbm - Db - Eb - Ab",
+          "Ab - Bbm - Db - Eb - Ab",
+          "Bbm - Eb - Ab"
+        ]
+      },
+      "sources": [
+        {
+          "name": "악보바다 원키 악보",
+          "url": "https://www.akbobada.com/musicDetail.html?musicID=57353"
+        },
+        {
+          "name": "코드 자료실",
+          "url": "https://www.ezcho.com/chop/3215"
+        },
+        {
+          "name": "타르테 코드 악보",
+          "url": "https://tartae.tistory.com/entry/%EC%9D%B4%EC%84%A0%ED%9D%AC-%EA%B7%B8-%EC%A4%91%EC%97%90-%EA%B7%B8%EB%8C%80%EB%A5%BC-%EB%A7%8C%EB%82%98-%EC%BD%94%EB%93%9C%EC%95%85%EB%B3%B4"
+        },
+        {
+          "name": "Shazam 이선희 원곡 정보",
+          "url": "https://www.shazam.com/song/847943315/meet-him-among-them"
+        },
+        {
+          "name": "1theK 공식 뮤직비디오",
+          "url": "https://www.youtube.com/watch?v=IAyMtl9FRHI"
+        },
+        {
+          "name": "GitHub 정확 곡명 검색",
+          "url": "https://github.com/search?q=%22%EC%9D%B4%EC%84%A0%ED%9D%AC%22+%22%EA%B7%B8+%EC%A4%91%EC%97%90+%EA%B7%B8%EB%8C%80%EB%A5%BC+%EB%A7%8C%EB%82%98%22+chord&type=code"
+        }
+      ],
+      "verified": true,
+      "verificationNote": "악보바다와 코드 자료실이 원키를 Ab major로 동일하게 표시한다. 악보바다는 통기타 편곡을 1프렛 카포의 G 코드형으로 명시하고, 타르테 자료도 G-Am-C-D-G 코드형을 사용한다. 섹션에는 카포를 적용한 실제 원키 음높이 Ab-Bbm-Db-Eb-Ab로 변환해 저장했다. Shazam은 이선희의 2014년 원곡을 65 BPM으로 표시한다. 커버와 남자키 자료는 제외했으며 박자표는 독립적으로 확인되지 않아 null로 두었다."
+    }
+  ]
+}
