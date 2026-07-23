@@ -7,6 +7,8 @@ import type { GenerateRequest, GenerationResult } from "@/lib/types";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
+const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
+
 class ProviderError extends Error {
   constructor(
     message: string,
@@ -14,6 +16,12 @@ class ProviderError extends Error {
   ) {
     super(message);
   }
+}
+
+interface GroqFailure {
+  model: string;
+  message: string;
+  status?: number;
 }
 
 function extractJson(text: string): unknown {
@@ -29,59 +37,51 @@ function extractJson(text: string): unknown {
 }
 
 async function postChatCompletion(options: {
-  url: string;
   apiKey: string;
   model: string;
   prompt: string;
-  provider: "glm" | "groq";
 }): Promise<GenerationResult> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 45_000);
 
   try {
-    const body: Record<string, unknown> = {
-      model: options.model,
-      messages: [
-        { role: "system", content: "Return only one valid JSON object that follows the requested schema." },
-        { role: "user", content: options.prompt },
-      ],
-      stream: false,
-      temperature: options.provider === "glm" ? 0.7 : 0.75,
-      max_tokens: 5000,
-    };
-
-    if (options.provider === "glm") {
-      body.thinking = { type: "disabled" };
-    }
-
-    const response = await fetch(options.url, {
+    const response = await fetch(GROQ_ENDPOINT, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${options.apiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify({
+        model: options.model,
+        messages: [
+          { role: "system", content: "Return only one valid JSON object that follows the requested schema." },
+          { role: "user", content: options.prompt },
+        ],
+        stream: false,
+        temperature: 0.75,
+        max_tokens: 5000,
+      }),
       cache: "no-store",
       signal: controller.signal,
     });
 
     if (!response.ok) {
-      throw new ProviderError(`${options.provider.toUpperCase()} 요청 실패`, response.status);
+      throw new ProviderError(`${options.model} 요청 실패`, response.status);
     }
 
     const payload = (await response.json()) as {
       choices?: Array<{ message?: { content?: string } }>;
     };
     const content = payload.choices?.[0]?.message?.content;
-    if (!content) throw new ProviderError(`${options.provider.toUpperCase()} 응답 내용이 비어 있습니다.`);
+    if (!content) throw new ProviderError(`${options.model} 응답 내용이 비어 있습니다.`);
 
     return generationResultSchema.parse(extractJson(content));
   } catch (error) {
     if (error instanceof ProviderError) throw error;
     if (error instanceof Error && error.name === "AbortError") {
-      throw new ProviderError(`${options.provider.toUpperCase()} 요청 시간이 초과되었습니다.`, 408);
+      throw new ProviderError(`${options.model} 요청 시간이 초과되었습니다.`, 408);
     }
-    throw new ProviderError(`${options.provider.toUpperCase()} 응답 처리에 실패했습니다.`);
+    throw new ProviderError(`${options.model} 응답 처리에 실패했습니다.`);
   } finally {
     clearTimeout(timeout);
   }
@@ -96,6 +96,16 @@ function providerMessage(error: unknown): string {
   return error.message;
 }
 
+function configuredModel(name: string, fallback: string): string {
+  return process.env[name]?.trim() || fallback;
+}
+
+function failureStatus(failures: GroqFailure[]): number {
+  if (failures.some((failure) => failure.status === 401 || failure.status === 403)) return 401;
+  if (failures.length > 0 && failures.every((failure) => failure.status === 429)) return 429;
+  return 502;
+}
+
 export async function POST(request: Request) {
   let parsed: GenerateRequest;
   try {
@@ -107,61 +117,61 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!parsed.song.verified) {
+  const prompt = buildGenerationPrompt(parsed);
+  const groqKey = process.env.GROQ_API_KEY?.trim();
+
+  if (!groqKey) {
+    if (process.env.NODE_ENV === "development") {
+      return NextResponse.json({
+        result: createMockResult(parsed.song),
+        provider: "mock",
+        warning: "개발 환경에 GROQ_API_KEY가 없어 Mock 결과를 표시했습니다.",
+      });
+    }
+
     return NextResponse.json(
-      { error: "검수되지 않은 곡 데이터는 생성에 사용할 수 없습니다." },
-      { status: 400 },
+      { error: "GROQ_API_KEY가 설정되지 않았습니다." },
+      { status: 503 },
     );
   }
 
-  const prompt = buildGenerationPrompt(parsed);
-  const failures: string[] = [];
-  const glmKey = process.env.GLM_API_KEY;
-  const groqKey = process.env.GROQ_API_KEY;
+  const models = [
+    configuredModel("GROQ_PRIMARY_MODEL", "openai/gpt-oss-120b"),
+    configuredModel("GROQ_FALLBACK_MODEL", "openai/gpt-oss-20b"),
+    configuredModel("GROQ_SECONDARY_MODEL", "llama-3.3-70b-versatile"),
+  ];
+  const failures: GroqFailure[] = [];
 
-  if (glmKey) {
+  for (const model of models) {
     try {
-      const base = (process.env.GLM_BASE_URL || "https://api.z.ai/api/paas/v4").replace(/\/$/u, "");
       const result = await postChatCompletion({
-        url: `${base}/chat/completions`,
-        apiKey: glmKey,
-        model: process.env.GLM_MODEL || "glm-4.5-flash",
-        prompt,
-        provider: "glm",
-      });
-      return NextResponse.json({ result, provider: "glm" });
-    } catch (error) {
-      failures.push(`GLM: ${providerMessage(error)}`);
-    }
-  } else {
-    failures.push("GLM: API Key 없음");
-  }
-
-  if (groqKey) {
-    try {
-      const base = (process.env.GROQ_BASE_URL || "https://api.groq.com/openai/v1").replace(/\/$/u, "");
-      const result = await postChatCompletion({
-        url: `${base}/chat/completions`,
         apiKey: groqKey,
-        model: process.env.GROQ_MODEL || "openai/gpt-oss-20b",
+        model,
         prompt,
-        provider: "groq",
       });
+
       return NextResponse.json({
         result,
         provider: "groq",
-        warning: failures.join(" / "),
+        warning: failures.length > 0
+          ? `${failures.length}개 Groq 모델 실패 후 ${model} 모델로 생성했습니다.`
+          : undefined,
       });
     } catch (error) {
-      failures.push(`Groq: ${providerMessage(error)}`);
+      failures.push({
+        model,
+        message: providerMessage(error),
+        status: error instanceof ProviderError ? error.status : undefined,
+      });
     }
-  } else {
-    failures.push("Groq: API Key 없음");
   }
 
-  return NextResponse.json({
-    result: createMockResult(parsed.song),
-    provider: "mock",
-    warning: `${failures.join(" / ")} — 안전한 Mock 결과를 표시했습니다.`,
-  });
+  return NextResponse.json(
+    {
+      error: `Groq 모델 호출에 모두 실패했습니다. ${failures
+        .map((failure) => `${failure.model}: ${failure.message}`)
+        .join(" / ")}`,
+    },
+    { status: failureStatus(failures) },
+  );
 }
