@@ -35,3 +35,5 @@ jobs:
           git add -A
           git commit -m "feat: implement Youtubemusic PRD"
           git push
+
+# Triggered after the workflow exists on the default branch.
