@@ -19,7 +19,7 @@ async function readArtists(directory: string): Promise<Artist[]> {
     throw error;
   }
 
-  return Promise.all(
+  const artists = await Promise.all(
     fileNames.map(async (fileName) => {
       const filePath = path.join(directory, fileName);
 
@@ -33,6 +33,13 @@ async function readArtists(directory: string): Promise<Artist[]> {
       }
     }),
   );
+
+  return artists
+    .map((artist) => ({
+      ...artist,
+      songs: artist.songs.filter((song) => song.verified),
+    }))
+    .filter((artist) => artist.songs.length > 0);
 }
 
 export async function loadArtists(): Promise<Artist[]> {
