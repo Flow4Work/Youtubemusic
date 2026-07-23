@@ -1,0 +1,162 @@
+{
+  "id": "lyn",
+  "name": "린",
+  "description": "검수된 실제 곡 데이터",
+  "songs": [
+    {
+      "id": "lyn-back-in-time",
+      "artistId": "lyn",
+      "artistName": "린",
+      "title": "시간을 거슬러",
+      "key": "D major",
+      "bpm": 73,
+      "timeSignature": null,
+      "sections": {
+        "intro": [],
+        "verse": [
+          "D - Em - Gm - Bm",
+          "G - A - D - Bm - Bb - E - F#"
+        ],
+        "preChorus": [],
+        "chorus": [
+          "Bm - A - G - D - A",
+          "Bm - A - G - D - A - Bm - A - G"
+        ],
+        "bridge": [
+          "A - Bm - G - D - E - F#"
+        ],
+        "finalChorus": [
+          "Bm - A - G - D - A",
+          "Bm - A - G - D - A - Bm - A - G",
+          "Bm - A - E - G - B"
+        ]
+      },
+      "sources": [
+        {
+          "name": "악보바다 원키 악보",
+          "url": "https://www.akbobada.com/musicDetail.html?musicID=47911"
+        },
+        {
+          "name": "타르테 원키 코드 악보",
+          "url": "https://tartae.tistory.com/entry/%EB%A6%B0-%EC%8B%9C%EA%B0%84%EC%9D%84-%EA%B1%B0%EC%8A%AC%EB%9F%AC-%EC%BD%94%EB%93%9C%EC%95%85%EB%B3%B4?category=469300"
+        },
+        {
+          "name": "Chordify 원곡 뮤직비디오 분석",
+          "url": "https://chordify.net/chords/mv-the-moon-that-embraces-the-sun-ost-part2-lyn-back-in-time-riak-official"
+        },
+        {
+          "name": "SongBPM 원곡 분석",
+          "url": "https://songbpm.com/%40lyn/back-in-time"
+        },
+        {
+          "name": "GitHub 정확 곡명 검색",
+          "url": "https://github.com/search?q=%22%EB%A6%B0%22+%22%EC%8B%9C%EA%B0%84%EC%9D%84+%EA%B1%B0%EC%8A%AC%EB%9F%AC%22+chord&type=code"
+        }
+      ],
+      "verified": true,
+      "verificationNote": "악보바다가 원키 D major를 명시하고 타르테 코드표도 D, Bm, G, A를 중심으로 작성되어 있다. Chordify와 SongBPM 역시 D major를 지지한다. SongBPM의 146 BPM은 체감 박자 기준 73 BPM의 더블타임이므로 73을 저장했다. 타르테 코드표의 Gm, Bb, E, F# 등 비다이어토닉 코드는 원문 그대로 반영했다. GitHub에서는 별도의 검증 가능한 코드 데이터가 발견되지 않았다."
+    },
+    {
+      "id": "lyn-my-destiny",
+      "artistId": "lyn",
+      "artistName": "린",
+      "title": "My Destiny",
+      "key": "G major",
+      "bpm": 64,
+      "timeSignature": null,
+      "sections": {
+        "intro": [],
+        "verse": [
+          "Am7 - D7 - GMaj7 - F#m7b5 - B7 - EMaj7",
+          "Am7 - D7 - GMaj7 - G#dim7 - Am9 - AmM7 - Am7 - D7sus4 - D7"
+        ],
+        "preChorus": [],
+        "chorus": [
+          "GMaj7 - Em7 - Em9 - Em7 - EmM7 - Em7",
+          "Am7 - AmM7 - D7",
+          "GMaj7 - Em7 - Em9 - Em7 - EmM7 - Em7",
+          "Am7 - D7"
+        ],
+        "bridge": [
+          "Am7 - D7 - GMaj7",
+          "Am7 - D7 - GMaj7"
+        ],
+        "finalChorus": [
+          "GMaj7 - Em7 - Em9 - Em7 - EmM7 - Em7",
+          "Am7 - AmM7 - D7",
+          "GMaj7 - Em7 - Em9 - Em7 - EmM7 - Em7",
+          "Am7 - D7 - GMaj7"
+        ]
+      },
+      "sources": [
+        {
+          "name": "악보바다 원키 악보",
+          "url": "https://www.akbobada.com/musicDetail.html?musicID=56734"
+        },
+        {
+          "name": "악보바다 원키 악보 샘플",
+          "url": "https://www.akbobada.com/home/akbobada/archive/akbo/samp/samp/20131231032049.pdf"
+        },
+        {
+          "name": "타르테 코드 악보",
+          "url": "https://tartae.tistory.com/entry/%EB%A6%B0-My-destiny-%EC%BD%94%EB%93%9C%EC%95%85%EB%B3%B4"
+        },
+        {
+          "name": "Chordify 원곡 분석",
+          "url": "https://chordify.net/chords/lyn-songs/my-destiny-chords"
+        },
+        {
+          "name": "SongBPM 원곡 분석",
+          "url": "https://songbpm.com/%40lyn/my-destiny-NKWYKcR4Fb"
+        },
+        {
+          "name": "GitHub 정확 곡명 검색",
+          "url": "https://github.com/search?q=%22%EB%A6%B0%22+%22My+Destiny%22+chord&type=code"
+        }
+      ],
+      "verified": true,
+      "verificationNote": "악보바다와 타르테 코드표가 G major로 일치한다. 타르테의 GMaj7-Em7-Am7-D7 중심 후렴과 원키 악보에서 확인되는 G 계열 코드도 일치한다. 악보바다 샘플은 64 BPM을 명시하며 SongBPM의 127 BPM은 약 64 BPM의 더블타임 분석이다. Chordify의 일부 대표 코드 표시는 곡 전체의 네 코드만 추린 값이므로 세부 진행은 타르테 원키 코드표를 우선했다."
+    },
+    {
+      "id": "lyn-we-used-to-love",
+      "artistId": "lyn",
+      "artistName": "린",
+      "title": "...사랑했잖아...",
+      "key": "Eb major",
+      "bpm": 64,
+      "timeSignature": null,
+      "sections": {
+        "intro": [],
+        "verse": [],
+        "preChorus": [],
+        "chorus": [],
+        "bridge": [],
+        "finalChorus": []
+      },
+      "sources": [
+        {
+          "name": "악보바다 원키 악보",
+          "url": "https://www.akbobada.com/musicDetail.html?musicID=12516"
+        },
+        {
+          "name": "Chordify 원곡 분석",
+          "url": "https://chordify.net/chords/lyn-songs/salanghaessjanh-a-chords"
+        },
+        {
+          "name": "ChordU 원곡 분석",
+          "url": "https://chordu.com/chords-tabs-%EB%A6%B0-lyn-%EC%82%AC%EB%9E%91%ED%96%88%EC%9E%96%EC%95%84--id_Z9mDJoQxOrg"
+        },
+        {
+          "name": "SongBPM 원곡 분석",
+          "url": "https://songbpm.com/%40lyn/---saranghaessjanha----dvgdEm6xgD"
+        },
+        {
+          "name": "GitHub 정확 곡명 검색",
+          "url": "https://github.com/search?q=%22%EB%A6%B0%22+%22%EC%82%AC%EB%9E%91%ED%96%88%EC%9E%96%EC%95%84%22+chord&type=code"
+        }
+      ],
+      "verified": true,
+      "verificationNote": "악보바다와 ChordU가 원키 Eb major로 일치한다. ChordU와 SongBPM은 약 128 BPM으로 분석하며 이는 느린 발라드 박자 기준 64 BPM의 더블타임이다. 원키 상태에서 섹션명이 명확히 표시된 두 개의 공개 텍스트 코드표를 확인하지 못했으므로 코드 배열은 비워 두었다. 남성키 및 MR 자료는 제외했다."
+    }
+  ]
+}
