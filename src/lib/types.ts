@@ -40,12 +40,18 @@ export interface ChordResult {
 
 export interface GenerationResult {
   chords: ChordResult;
+  /** English-only prompt copied into Suno. */
   sunoStyle: string;
+  /** Korean explanation of the English Suno prompt. */
+  sunoStyleKorean: string;
   lyrics: {
     a: string;
     b: string;
   };
+  /** Three Korean title candidates. */
   titles: string[];
+  /** English translations matching the Korean titles by index. */
+  titlesEnglish: string[];
   hashtags: string[];
 }
 
