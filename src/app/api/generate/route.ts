@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createMockResult } from "@/lib/mock";
 import { buildGenerationPrompt } from "@/lib/prompt";
-import { generateRequestSchema, generationResultSchema, parseTargetResult } from "@/lib/schemas";
+import { existingGenerationResultSchema, generateRequestSchema, generationResultSchema, parseTargetResult } from "@/lib/schemas";
 import type { GenerateRequest, GenerationResult, GenerationTarget } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -146,19 +146,27 @@ function mergeTargetResult(input: GenerateRequest, generated: Record<string, unk
   if (input.target === "all") return generationResultSchema.parse(generated);
   if (!input.existing) throw new Error("부분 재생성에 필요한 기존 결과가 없습니다.");
 
-  if (input.target === "chords") return generationResultSchema.parse({ ...input.existing, chords: generated.chords });
-  if (input.target === "style") return generationResultSchema.parse({
-    ...input.existing,
-    sunoStyle: generated.sunoStyle,
-    sunoStyleKorean: generated.sunoStyleKorean,
-  });
-  if (input.target === "lyrics") return generationResultSchema.parse({ ...input.existing, lyrics: generated.lyrics });
-  if (input.target === "titles") return generationResultSchema.parse({
-    ...input.existing,
-    titles: generated.titles,
-    titlesEnglish: generated.titlesEnglish,
-  });
-  return generationResultSchema.parse({ ...input.existing, hashtags: generated.hashtags });
+  if (input.target === "lyrics") {
+    return generationResultSchema.parse({ ...input.existing, lyrics: generated.lyrics });
+  }
+  if (input.target === "chords") {
+    return existingGenerationResultSchema.parse({ ...input.existing, chords: generated.chords }) as GenerationResult;
+  }
+  if (input.target === "style") {
+    return existingGenerationResultSchema.parse({
+      ...input.existing,
+      sunoStyle: generated.sunoStyle,
+      sunoStyleKorean: generated.sunoStyleKorean,
+    }) as GenerationResult;
+  }
+  if (input.target === "titles") {
+    return existingGenerationResultSchema.parse({
+      ...input.existing,
+      titles: generated.titles,
+      titlesEnglish: generated.titlesEnglish,
+    }) as GenerationResult;
+  }
+  return existingGenerationResultSchema.parse({ ...input.existing, hashtags: generated.hashtags }) as GenerationResult;
 }
 
 function logGeneration(event: string, fields: Record<string, unknown>): void {
