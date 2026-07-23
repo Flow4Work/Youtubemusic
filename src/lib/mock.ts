@@ -8,15 +8,16 @@ export function createMockResult(song: Song): GenerationResult {
   const baseSections = Object.fromEntries(
     Object.entries(song.sections).map(([name, chords]) => [name, [...chords]]),
   );
+  const bpm = song.bpm ?? 88;
 
   return {
     chords: {
-      key: song.key,
-      bpm: Math.min(180, Math.max(55, song.bpm + 4)),
-      timeSignature: song.timeSignature,
+      key: song.key ?? "C major",
+      bpm: Math.min(180, Math.max(55, bpm + 4)),
+      timeSignature: song.timeSignature ?? "4/4",
       sections: {
         ...baseSections,
-        bridge: baseSections.bridge ?? ["Am7", "Em7", "Fmaj7", "G"],
+        bridge: baseSections.bridge?.length ? baseSections.bridge : ["Am7", "Em7", "Fmaj7", "G"],
       },
     },
     sunoStyle:

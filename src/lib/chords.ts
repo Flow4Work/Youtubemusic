@@ -25,6 +25,13 @@ function transposeToken(chord: string, semitones: number): string {
   });
 }
 
+function mapChordLine(line: string, transform: (chord: string) => string): string {
+  return line
+    .split(/(\s+(?:-|→|\|)\s+)/u)
+    .map((part) => (/^\s+(?:-|→|\|)\s+$/u.test(part) ? part : transform(part.trim())))
+    .join("");
+}
+
 export function transposeChordResult(result: ChordResult, semitones: number): ChordResult {
   return {
     ...result,
@@ -32,7 +39,7 @@ export function transposeChordResult(result: ChordResult, semitones: number): Ch
     sections: Object.fromEntries(
       Object.entries(result.sections).map(([section, chords]) => [
         section,
-        chords.map((chord) => transposeToken(chord, semitones)),
+        chords.map((line) => mapChordLine(line, (chord) => transposeToken(chord, semitones))),
       ]),
     ),
   };
@@ -52,7 +59,7 @@ export function simplifyChordResult(result: ChordResult): ChordResult {
     sections: Object.fromEntries(
       Object.entries(result.sections).map(([section, chords]) => [
         section,
-        chords.map(simplifyChord),
+        chords.map((line) => mapChordLine(line, simplifyChord)),
       ]),
     ),
   };
@@ -64,5 +71,6 @@ export const sectionLabel: Record<string, string> = {
   preChorus: "프리코러스",
   chorus: "코러스",
   bridge: "브리지",
+  finalChorus: "파이널 코러스",
   outro: "아웃트로",
 };

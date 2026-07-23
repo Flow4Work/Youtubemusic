@@ -1,15 +1,24 @@
 export type SongSections = Record<string, string[]>;
 
+export interface SongSource {
+  name: string;
+  url: string;
+}
+
 export interface Song {
   id: string;
+  artistId?: string;
+  artistName?: string;
   title: string;
-  key: string;
-  bpm: number;
-  timeSignature: string;
+  key: string | null;
+  bpm: number | null;
+  timeSignature: string | null;
   sections: SongSections;
-  sourceName: string;
-  sourceUrl: string;
-  license: string;
+  sources?: SongSource[];
+  verificationNote?: string;
+  sourceName?: string;
+  sourceUrl?: string;
+  license?: string;
   verified: boolean;
   demo?: boolean;
 }
