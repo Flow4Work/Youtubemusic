@@ -64,28 +64,33 @@ function lyricLineCount(text: string): number {
 }
 
 function hasRequiredLyricSections(text: string): boolean {
-  return /\[Verse(?:\s*\d+)?\]/iu.test(text) && /\[(?:Final\s+)?Chorus\]/iu.test(text);
+  return /\[Verse(?:\s*\d+)?\]/iu.test(text) && /\[Chorus\]/iu.test(text) && /\[Final\s+Chorus\]/iu.test(text);
 }
 
 const lyricA = z.string().min(180)
-  .refine(hasRequiredLyricSections, "A안에는 [Verse]와 [Chorus] 구간명이 필요합니다.")
+  .refine(hasRequiredLyricSections, "A안에는 [Verse], [Chorus], [Final Chorus] 구간명이 필요합니다.")
   .refine(
     (text) => {
       const count = lyricLineCount(text);
-      return count >= 24 && count <= 30;
+      return count >= 24 && count <= 28;
     },
-    "A안은 구간명을 제외한 실제 가사 24~30줄이어야 합니다.",
+    "A안은 구간명을 제외한 실제 가사 24~28줄이어야 합니다.",
   );
 
 const lyricB = z.string().min(140)
-  .refine(hasRequiredLyricSections, "B안에는 [Verse]와 [Chorus] 구간명이 필요합니다.")
+  .refine(hasRequiredLyricSections, "B안에는 [Verse], [Chorus], [Final Chorus] 구간명이 필요합니다.")
   .refine(
     (text) => {
       const count = lyricLineCount(text);
-      return count >= 20 && count <= 26;
+      return count >= 20 && count <= 24;
     },
-    "B안은 구간명을 제외한 실제 가사 20~26줄이어야 합니다.",
+    "B안은 구간명을 제외한 실제 가사 20~24줄이어야 합니다.",
   );
+
+const lyricsSchema = z.object({
+  a: lyricA,
+  b: lyricB,
+});
 
 const legacyLyricsSchema = z.object({
   a: z.string().min(1),
@@ -102,11 +107,36 @@ const titlesSchema = z.array(z.string().min(1).max(40)).length(3)
 const hashtagsSchema = z.array(z.string().regex(/^#[^\s#]+$/u, "해시태그는 #으로 시작하고 공백이 없어야 합니다.")).length(8)
   .refine(uniqueStrings, "해시태그 8개는 서로 달라야 합니다.");
 
+export const lyricBlueprintSchema = z.object({
+  storyPremise: z.string().min(20).max(240),
+  openingScene: z.string().min(15).max(180),
+  speakerGoal: z.string().min(10).max(160),
+  emotionalArc: z.array(z.string().min(5).max(100)).min(4).max(6),
+  chorusHookIntent: z.string().min(10).max(160),
+  finalResolution: z.string().min(10).max(160),
+  tempoFeel: z.string().min(8).max(100),
+  harmonicMotion: z.string().min(8).max(140),
+  vocalEnergy: z.string().min(8).max(140),
+  concreteWordPalette: z.array(z.string().min(1).max(30)).min(6).max(12),
+  avoidList: z.array(z.string().min(1).max(40)).min(8).max(16),
+});
+
+export const songPlanSchema = z.object({
+  chords: chordResultSchema,
+  sunoStyle: z.string().min(180).max(1200),
+  sunoStyleKorean: z.string().min(100).max(1600),
+  lyricBlueprint: lyricBlueprintSchema,
+});
+
 export const lyricsResultSchema = z.object({
-  lyrics: z.object({
-    a: lyricA,
-    b: lyricB,
-  }),
+  lyrics: lyricsSchema,
+});
+
+export const lyricPublicationPackageSchema = z.object({
+  lyrics: lyricsSchema,
+  titles: titlesSchema,
+  titlesEnglish: titlesSchema,
+  hashtags: hashtagsSchema,
 });
 
 export const styleResultSchema = z.object({
@@ -131,10 +161,7 @@ export const generationResultSchema = z.object({
   chords: chordResultSchema,
   sunoStyle: z.string().min(180).max(1200),
   sunoStyleKorean: z.string().min(100).max(1600),
-  lyrics: z.object({
-    a: lyricA,
-    b: lyricB,
-  }),
+  lyrics: lyricsSchema,
   titles: titlesSchema,
   titlesEnglish: titlesSchema,
   hashtags: hashtagsSchema,
