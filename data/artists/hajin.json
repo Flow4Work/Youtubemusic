@@ -1,0 +1,52 @@
+{
+  "id": "hajin",
+  "name": "하진",
+  "description": "기능 검증을 위한 가상 데모 아티스트",
+  "demo": true,
+  "songs": [
+    {
+      "id": "hajin-demo-song",
+      "title": "비가 그친 뒤",
+      "key": "C",
+      "bpm": 82,
+      "timeSignature": "4/4",
+      "sections": {
+        "intro": [
+          "C",
+          "Em7",
+          "Am7",
+          "F"
+        ],
+        "verse": [
+          "C",
+          "Em7",
+          "Am7",
+          "F"
+        ],
+        "preChorus": [
+          "F",
+          "G",
+          "Em7",
+          "Am7"
+        ],
+        "chorus": [
+          "F",
+          "G",
+          "Em7",
+          "Am7"
+        ],
+        "outro": [
+          "C",
+          "Em7",
+          "Am7",
+          "F"
+        ]
+      },
+      "sourceName": "Youtubemusic 자체 제작 데모 데이터",
+      "sourceUrl": "https://github.com/Flow4Work/Youtubemusic",
+      "license": "CC0-1.0",
+      "verified": true,
+      "demo": true
+    }
+  ]
+}

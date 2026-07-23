@@ -1,0 +1,52 @@
+{
+  "id": "arin",
+  "name": "아린",
+  "description": "기능 검증을 위한 가상 데모 아티스트",
+  "demo": true,
+  "songs": [
+    {
+      "id": "arin-demo-song",
+      "title": "너의 계절",
+      "key": "A",
+      "bpm": 90,
+      "timeSignature": "4/4",
+      "sections": {
+        "intro": [
+          "A",
+          "F#m7",
+          "D",
+          "E"
+        ],
+        "verse": [
+          "A",
+          "F#m7",
+          "D",
+          "E"
+        ],
+        "preChorus": [
+          "D",
+          "E",
+          "C#m7",
+          "F#m7"
+        ],
+        "chorus": [
+          "D",
+          "E",
+          "C#m7",
+          "F#m7"
+        ],
+        "outro": [
+          "A",
+          "F#m7",
+          "D",
+          "E"
+        ]
+      },
+      "sourceName": "Youtubemusic 자체 제작 데모 데이터",
+      "sourceUrl": "https://github.com/Flow4Work/Youtubemusic",
+      "license": "CC0-1.0",
+      "verified": true,
+      "demo": true
+    }
+  ]
+}

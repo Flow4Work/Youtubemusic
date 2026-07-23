@@ -1,0 +1,52 @@
+{
+  "id": "yedam",
+  "name": "예담",
+  "description": "기능 검증을 위한 가상 데모 아티스트",
+  "demo": true,
+  "songs": [
+    {
+      "id": "yedam-demo-song",
+      "title": "한 걸음 먼저",
+      "key": "A",
+      "bpm": 110,
+      "timeSignature": "4/4",
+      "sections": {
+        "intro": [
+          "A",
+          "C#m7",
+          "D",
+          "E"
+        ],
+        "verse": [
+          "A",
+          "C#m7",
+          "D",
+          "E"
+        ],
+        "preChorus": [
+          "D",
+          "E",
+          "C#m7",
+          "F#m7"
+        ],
+        "chorus": [
+          "D",
+          "E",
+          "C#m7",
+          "F#m7"
+        ],
+        "outro": [
+          "A",
+          "C#m7",
+          "D",
+          "E"
+        ]
+      },
+      "sourceName": "Youtubemusic 자체 제작 데모 데이터",
+      "sourceUrl": "https://github.com/Flow4Work/Youtubemusic",
+      "license": "CC0-1.0",
+      "verified": true,
+      "demo": true
+    }
+  ]
+}

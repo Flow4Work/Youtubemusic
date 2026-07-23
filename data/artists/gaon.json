@@ -1,0 +1,52 @@
+{
+  "id": "gaon",
+  "name": "가온",
+  "description": "기능 검증을 위한 가상 데모 아티스트",
+  "demo": true,
+  "songs": [
+    {
+      "id": "gaon-demo-song",
+      "title": "마음의 지도",
+      "key": "C",
+      "bpm": 104,
+      "timeSignature": "4/4",
+      "sections": {
+        "intro": [
+          "C",
+          "Em7",
+          "F",
+          "G"
+        ],
+        "verse": [
+          "C",
+          "Em7",
+          "F",
+          "G"
+        ],
+        "preChorus": [
+          "F",
+          "G",
+          "Em7",
+          "Am7"
+        ],
+        "chorus": [
+          "F",
+          "G",
+          "Em7",
+          "Am7"
+        ],
+        "outro": [
+          "C",
+          "Em7",
+          "F",
+          "G"
+        ]
+      },
+      "sourceName": "Youtubemusic 자체 제작 데모 데이터",
+      "sourceUrl": "https://github.com/Flow4Work/Youtubemusic",
+      "license": "CC0-1.0",
+      "verified": true,
+      "demo": true
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "id": "seowoo",
+  "name": "서우",
+  "description": "기능 검증을 위한 가상 데모 아티스트",
+  "demo": true,
+  "songs": [
+    {
+      "id": "seowoo-demo-song",
+      "title": "다정한 내일",
+      "key": "F",
+      "bpm": 94,
+      "timeSignature": "4/4",
+      "sections": {
+        "intro": [
+          "F",
+          "Am7",
+          "Bb",
+          "C"
+        ],
+        "verse": [
+          "F",
+          "Am7",
+          "Bb",
+          "C"
+        ],
+        "preChorus": [
+          "Bb",
+          "C",
+          "Am7",
+          "Dm7"
+        ],
+        "chorus": [
+          "Bb",
+          "C",
+          "Am7",
+          "Dm7"
+        ],
+        "outro": [
+          "F",
+          "Am7",
+          "Bb",
+          "C"
+        ]
+      },
+      "sourceName": "Youtubemusic 자체 제작 데모 데이터",
+      "sourceUrl": "https://github.com/Flow4Work/Youtubemusic",
+      "license": "CC0-1.0",
+      "verified": true,
+      "demo": true
+    }
+  ]
+}

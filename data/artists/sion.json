@@ -1,0 +1,52 @@
+{
+  "id": "sion",
+  "name": "시온",
+  "description": "기능 검증을 위한 가상 데모 아티스트",
+  "demo": true,
+  "songs": [
+    {
+      "id": "sion-demo-song",
+      "title": "빛이 머문 자리",
+      "key": "D",
+      "bpm": 86,
+      "timeSignature": "4/4",
+      "sections": {
+        "intro": [
+          "D",
+          "F#m7",
+          "G",
+          "A"
+        ],
+        "verse": [
+          "D",
+          "F#m7",
+          "G",
+          "A"
+        ],
+        "preChorus": [
+          "G",
+          "A",
+          "F#m7",
+          "Bm7"
+        ],
+        "chorus": [
+          "G",
+          "A",
+          "F#m7",
+          "Bm7"
+        ],
+        "outro": [
+          "D",
+          "F#m7",
+          "G",
+          "A"
+        ]
+      },
+      "sourceName": "Youtubemusic 자체 제작 데모 데이터",
+      "sourceUrl": "https://github.com/Flow4Work/Youtubemusic",
+      "license": "CC0-1.0",
+      "verified": true,
+      "demo": true
+    }
+  ]
+}

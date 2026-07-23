@@ -1,0 +1,52 @@
+{
+  "id": "saebom",
+  "name": "새봄",
+  "description": "기능 검증을 위한 가상 데모 아티스트",
+  "demo": true,
+  "songs": [
+    {
+      "id": "saebom-demo-song",
+      "title": "천천히 걸어",
+      "key": "D",
+      "bpm": 98,
+      "timeSignature": "4/4",
+      "sections": {
+        "intro": [
+          "D",
+          "A",
+          "Bm7",
+          "G"
+        ],
+        "verse": [
+          "D",
+          "A",
+          "Bm7",
+          "G"
+        ],
+        "preChorus": [
+          "G",
+          "A",
+          "F#m7",
+          "Bm7"
+        ],
+        "chorus": [
+          "G",
+          "A",
+          "F#m7",
+          "Bm7"
+        ],
+        "outro": [
+          "D",
+          "A",
+          "Bm7",
+          "G"
+        ]
+      },
+      "sourceName": "Youtubemusic 자체 제작 데모 데이터",
+      "sourceUrl": "https://github.com/Flow4Work/Youtubemusic",
+      "license": "CC0-1.0",
+      "verified": true,
+      "demo": true
+    }
+  ]
+}

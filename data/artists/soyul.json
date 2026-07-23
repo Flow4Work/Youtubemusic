@@ -1,0 +1,52 @@
+{
+  "id": "soyul",
+  "name": "소율",
+  "description": "기능 검증을 위한 가상 데모 아티스트",
+  "demo": true,
+  "songs": [
+    {
+      "id": "soyul-demo-song",
+      "title": "작은 용기",
+      "key": "D",
+      "bpm": 112,
+      "timeSignature": "4/4",
+      "sections": {
+        "intro": [
+          "D",
+          "Bm7",
+          "G",
+          "A"
+        ],
+        "verse": [
+          "D",
+          "Bm7",
+          "G",
+          "A"
+        ],
+        "preChorus": [
+          "G",
+          "A",
+          "F#m7",
+          "Bm7"
+        ],
+        "chorus": [
+          "G",
+          "A",
+          "F#m7",
+          "Bm7"
+        ],
+        "outro": [
+          "D",
+          "Bm7",
+          "G",
+          "A"
+        ]
+      },
+      "sourceName": "Youtubemusic 자체 제작 데모 데이터",
+      "sourceUrl": "https://github.com/Flow4Work/Youtubemusic",
+      "license": "CC0-1.0",
+      "verified": true,
+      "demo": true
+    }
+  ]
+}

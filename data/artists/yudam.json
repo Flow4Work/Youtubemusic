@@ -1,0 +1,52 @@
+{
+  "id": "yudam",
+  "name": "유담",
+  "description": "기능 검증을 위한 가상 데모 아티스트",
+  "demo": true,
+  "songs": [
+    {
+      "id": "yudam-demo-song",
+      "title": "늦은 편지",
+      "key": "F",
+      "bpm": 72,
+      "timeSignature": "4/4",
+      "sections": {
+        "intro": [
+          "F",
+          "Dm7",
+          "Bb",
+          "C"
+        ],
+        "verse": [
+          "F",
+          "Dm7",
+          "Bb",
+          "C"
+        ],
+        "preChorus": [
+          "Bb",
+          "C",
+          "Am7",
+          "Dm7"
+        ],
+        "chorus": [
+          "Bb",
+          "C",
+          "Am7",
+          "Dm7"
+        ],
+        "outro": [
+          "F",
+          "Dm7",
+          "Bb",
+          "C"
+        ]
+      },
+      "sourceName": "Youtubemusic 자체 제작 데모 데이터",
+      "sourceUrl": "https://github.com/Flow4Work/Youtubemusic",
+      "license": "CC0-1.0",
+      "verified": true,
+      "demo": true
+    }
+  ]
+}

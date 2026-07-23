@@ -1,0 +1,52 @@
+{
+  "id": "seodam",
+  "name": "서담",
+  "description": "기능 검증을 위한 가상 데모 아티스트",
+  "demo": true,
+  "songs": [
+    {
+      "id": "seodam-demo-song",
+      "title": "오래된 사진",
+      "key": "E",
+      "bpm": 88,
+      "timeSignature": "4/4",
+      "sections": {
+        "intro": [
+          "E",
+          "B",
+          "C#m7",
+          "Amaj7"
+        ],
+        "verse": [
+          "E",
+          "B",
+          "C#m7",
+          "Amaj7"
+        ],
+        "preChorus": [
+          "Amaj7",
+          "B",
+          "G#m7",
+          "C#m7"
+        ],
+        "chorus": [
+          "Amaj7",
+          "B",
+          "G#m7",
+          "C#m7"
+        ],
+        "outro": [
+          "E",
+          "B",
+          "C#m7",
+          "Amaj7"
+        ]
+      },
+      "sourceName": "Youtubemusic 자체 제작 데모 데이터",
+      "sourceUrl": "https://github.com/Flow4Work/Youtubemusic",
+      "license": "CC0-1.0",
+      "verified": true,
+      "demo": true
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "id": "narin",
+  "name": "나린",
+  "description": "기능 검증을 위한 가상 데모 아티스트",
+  "demo": true,
+  "songs": [
+    {
+      "id": "narin-demo-song",
+      "title": "하루 끝에서",
+      "key": "F",
+      "bpm": 76,
+      "timeSignature": "4/4",
+      "sections": {
+        "intro": [
+          "F",
+          "C",
+          "Dm7",
+          "Bbmaj7"
+        ],
+        "verse": [
+          "F",
+          "C",
+          "Dm7",
+          "Bbmaj7"
+        ],
+        "preChorus": [
+          "Bbmaj7",
+          "C",
+          "Am7",
+          "Dm7"
+        ],
+        "chorus": [
+          "Bbmaj7",
+          "C",
+          "Am7",
+          "Dm7"
+        ],
+        "outro": [
+          "F",
+          "C",
+          "Dm7",
+          "Bbmaj7"
+        ]
+      },
+      "sourceName": "Youtubemusic 자체 제작 데모 데이터",
+      "sourceUrl": "https://github.com/Flow4Work/Youtubemusic",
+      "license": "CC0-1.0",
+      "verified": true,
+      "demo": true
+    }
+  ]
+}

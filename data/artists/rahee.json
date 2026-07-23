@@ -1,0 +1,52 @@
+{
+  "id": "rahee",
+  "name": "라희",
+  "description": "기능 검증을 위한 가상 데모 아티스트",
+  "demo": true,
+  "songs": [
+    {
+      "id": "rahee-demo-song",
+      "title": "우리의 온도",
+      "key": "G",
+      "bpm": 100,
+      "timeSignature": "4/4",
+      "sections": {
+        "intro": [
+          "G",
+          "Bm7",
+          "C",
+          "D"
+        ],
+        "verse": [
+          "G",
+          "Bm7",
+          "C",
+          "D"
+        ],
+        "preChorus": [
+          "C",
+          "D",
+          "Bm7",
+          "Em7"
+        ],
+        "chorus": [
+          "C",
+          "D",
+          "Bm7",
+          "Em7"
+        ],
+        "outro": [
+          "G",
+          "Bm7",
+          "C",
+          "D"
+        ]
+      },
+      "sourceName": "Youtubemusic 자체 제작 데모 데이터",
+      "sourceUrl": "https://github.com/Flow4Work/Youtubemusic",
+      "license": "CC0-1.0",
+      "verified": true,
+      "demo": true
+    }
+  ]
+}
