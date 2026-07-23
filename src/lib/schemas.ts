@@ -39,15 +39,38 @@ export const chordResultSchema = z.object({
   sections: z.record(z.string(), z.array(z.string())),
 });
 
-const lyricA = z.string().min(180).refine(
-  (text) => text.split("\n").filter((line) => line.trim().length > 0).length >= 24,
-  "A안은 실제 가사 24줄 이상이어야 합니다.",
-);
+const sectionHeaderPattern = /^\s*\[[^\]]+\]\s*$/u;
 
-const lyricB = z.string().min(120).refine(
-  (text) => text.split("\n").filter((line) => line.trim().length > 0).length >= 16,
-  "B안은 실제 가사 16줄 이상이어야 합니다.",
-);
+function lyricLineCount(text: string): number {
+  return text
+    .split("\n")
+    .filter((line) => line.trim().length > 0 && !sectionHeaderPattern.test(line))
+    .length;
+}
+
+function hasRequiredLyricSections(text: string): boolean {
+  return /\[Verse(?:\s*\d+)?\]/iu.test(text) && /\[(?:Final\s+)?Chorus\]/iu.test(text);
+}
+
+const lyricA = z.string().min(180)
+  .refine(hasRequiredLyricSections, "A안에는 [Verse]와 [Chorus] 구간명이 필요합니다.")
+  .refine(
+    (text) => {
+      const count = lyricLineCount(text);
+      return count >= 24 && count <= 30;
+    },
+    "A안은 구간명을 제외한 실제 가사 24~30줄이어야 합니다.",
+  );
+
+const lyricB = z.string().min(140)
+  .refine(hasRequiredLyricSections, "B안에는 [Verse]와 [Chorus] 구간명이 필요합니다.")
+  .refine(
+    (text) => {
+      const count = lyricLineCount(text);
+      return count >= 20 && count <= 26;
+    },
+    "B안은 구간명을 제외한 실제 가사 20~26줄이어야 합니다.",
+  );
 
 export const lyricsResultSchema = z.object({
   lyrics: z.object({
