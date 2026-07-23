@@ -62,8 +62,8 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
   const selectedArtist = useMemo(() => artists.find((artist) => artist.id === artistId) ?? null, [artists, artistId]);
   const selectedSong = useMemo(() => selectedArtist?.songs.find((song) => song.id === songId) ?? null, [selectedArtist, songId]);
   const displayChords = useMemo(() => !result ? null : simplified ? simplifyChordResult(result.chords) : result.chords, [result, simplified]);
-  const canGenerate = Boolean(selectedArtist && selectedSong?.verified && !loading);
-  const providerName = result?.provider === "glm" ? "GLM" : result?.provider === "groq" ? "Groq" : "Mock";
+  const canGenerate = Boolean(selectedArtist && selectedSong && !loading);
+  const providerName = result?.provider === "groq" ? "Groq" : "Mock";
 
   function chooseArtist(id: string) {
     setArtistId(id); setSongId(""); setResult(null); setMessage(null);
@@ -78,7 +78,6 @@ export default function MusicGenerator({ artists }: { artists: Artist[] }) {
 
   async function generate(target: GenerationTarget) {
     if (!selectedArtist || !selectedSong || loading) return;
-    if (!selectedSong.verified) return setMessage({ text: "검수된 대표곡만 생성에 사용할 수 있습니다.", error: true });
     setLoading(target); setMessage(null); abortRef.current?.abort();
     const controller = new AbortController(); abortRef.current = controller;
     try {
