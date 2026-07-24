@@ -100,11 +100,27 @@ function normalizeLyrics(value: unknown): JsonRecord {
   return { a: lyricVariant(a), b: lyricVariant(b ?? a) };
 }
 
+function chordSectionKey(key: string): string {
+  const normalized = key.replace(/[\s_-]+/gu, "").toLocaleLowerCase();
+  if (/^intro/u.test(normalized)) return "intro";
+  if (/^verse/u.test(normalized)) return "verse";
+  if (/^prechorus/u.test(normalized)) return "preChorus";
+  if (/^chorus/u.test(normalized)) return "chorus";
+  if (/^bridge/u.test(normalized)) return "bridge";
+  if (/^outro/u.test(normalized)) return "outro";
+  return key.trim() || "section";
+}
+
 function normalizeSections(value: unknown): JsonRecord {
   const record = asRecord(value);
-  return Object.fromEntries(
-    Object.entries(record).map(([key, section]) => [key.toLocaleLowerCase(), toStringArray(section)]),
-  );
+  const sections: Record<string, string[]> = {};
+
+  for (const [key, section] of Object.entries(record)) {
+    const canonical = chordSectionKey(key);
+    sections[canonical] = [...(sections[canonical] ?? []), ...toStringArray(section)];
+  }
+
+  return sections;
 }
 
 function normalizeChords(value: unknown): JsonRecord {
@@ -130,8 +146,11 @@ export function normalizeMemoryResponse(value: unknown, expectedItems: readonly 
   const root = asRecord(value);
   const normalized: JsonRecord = { ...root };
 
-  if (root.chords !== undefined) normalized.chords = normalizeChords(root.chords);
-  if (root.lyrics !== undefined) normalized.lyrics = normalizeLyrics(root.lyrics);
+  const chordSource = root.chords ?? (root.sections !== undefined ? root : undefined);
+  if (chordSource !== undefined) normalized.chords = normalizeChords(chordSource);
+
+  const lyricSource = root.lyrics ?? (root.a !== undefined || root.b !== undefined ? root : undefined);
+  if (lyricSource !== undefined) normalized.lyrics = normalizeLyrics(lyricSource);
 
   const sequence = normalizeList(firstDefined(root, ["memorySequence", "memory_sequence", "sequence"]));
   normalized.memorySequence = sequence.length > 0 ? sequence : [...expectedItems];
