@@ -1,0 +1,22 @@
+name: Export memory style layout source
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Package source
+        run: |
+          tar --exclude=.git --exclude=node_modules --exclude=.next --exclude=.github/workflows/export-memory-style-layout.yml -czf /tmp/youtubemusic-source.tar.gz .
+      - name: Upload source
+        uses: actions/upload-artifact@v4
+        with:
+          name: youtubemusic-memory-style-layout
+          path: /tmp/youtubemusic-source.tar.gz
+          if-no-files-found: error
