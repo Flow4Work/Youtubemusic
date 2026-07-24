@@ -66,7 +66,7 @@ export const memoryGenerateRequestSchema = z.object({
   style: z.string().refine(isMemoryStyle, `음악 스타일은 ${MEMORY_STYLES.join(", ")} 중 하나여야 합니다.`),
   target: z.enum(["all", "chords", "style", "lyrics", "titles", "hashtags"]),
   existing: existingGenerationResultSchema.optional(),
-}).superRefine((value: MemoryGenerateRequest, context: { addIssue: (issue: unknown) => void }) => {
+}).superRefine((value, context) => {
   if (value.target !== "all" && !value.existing) {
     context.addIssue({ code: "custom", path: ["existing"], message: "부분 재생성에는 기존 결과가 필요합니다." });
   }
