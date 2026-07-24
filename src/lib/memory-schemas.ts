@@ -104,8 +104,15 @@ export function parseMemoryTargetResult(
     assertExactSequence(parsed.memorySequence, expectedItems);
     assertSequenceInLyrics(parsed.lyrics.a, expectedItems, "A안");
     assertSequenceInLyrics(parsed.lyrics.b, expectedItems, "B안");
-    const { memorySequence: _memorySequence, ...result } = parsed;
-    return result;
+    return {
+      chords: parsed.chords,
+      sunoStyle: parsed.sunoStyle,
+      sunoStyleKorean: parsed.sunoStyleKorean,
+      lyrics: parsed.lyrics,
+      titles: parsed.titles,
+      titlesEnglish: parsed.titlesEnglish,
+      hashtags: parsed.hashtags,
+    };
   }
   if (target === "lyrics") {
     const parsed = memoryLyricsResponseSchema.parse(value);
