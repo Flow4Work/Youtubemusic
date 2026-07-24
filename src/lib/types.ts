@@ -63,6 +63,18 @@ export type GenerationTarget =
   | "titles"
   | "hashtags";
 
+export type GeneratorMode = "regular" | "memory";
+
+export type MemorySongStyle =
+  | "밝은 팝"
+  | "쉬운 랩"
+  | "동요 느낌"
+  | "K-pop"
+  | "EDM"
+  | "어쿠스틱"
+  | "힙합"
+  | "발라드";
+
 export interface GeneratedPayload extends GenerationResult {
   id: string;
   artistId: string;
@@ -72,11 +84,22 @@ export interface GeneratedPayload extends GenerationResult {
   provider: "groq" | "mock";
   generatedAt: string;
   warning?: string;
+  mode?: GeneratorMode;
+  memoryTopicId?: string;
+  memoryStyle?: MemorySongStyle;
 }
 
 export interface GenerateRequest {
   artist: Artist;
   song: Song;
+  target: GenerationTarget;
+  existing?: GenerationResult;
+}
+
+export interface MemoryGenerateRequest {
+  mode: "memory";
+  topicId: string;
+  style: MemorySongStyle;
   target: GenerationTarget;
   existing?: GenerationResult;
 }

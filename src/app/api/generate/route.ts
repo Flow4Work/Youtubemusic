@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import type { z } from "zod";
+import { ZodError, z } from "zod";
 import { createMockResult } from "@/lib/mock";
 import { buildGenerationPrompt } from "@/lib/prompt";
 import {
@@ -27,17 +27,21 @@ export const maxDuration = 120;
 const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
 const DEFAULT_RETRY_AFTER_SECONDS = 10;
 const OSS_LYRICS_MODEL = "openai/gpt-oss-120b";
+const OUTPUT_RETRY_COUNT = 1;
 
 type LyricBlueprint = z.infer<typeof lyricBlueprintSchema>;
 type LyricsResult = z.infer<typeof lyricsResultSchema>;
 type LyricPublicationPackage = z.infer<typeof lyricPublicationPackageSchema>;
 type SongPlan = z.infer<typeof songPlanSchema>;
+type ProviderErrorKind = "http" | "timeout" | "empty" | "json" | "schema" | "response";
 
 class ProviderError extends Error {
   constructor(
     message: string,
     readonly status?: number,
     readonly retryAfter?: number,
+    readonly kind: ProviderErrorKind = "response",
+    readonly detail?: string,
   ) {
     super(message);
   }
@@ -47,8 +51,30 @@ interface GroqFailure {
   model: string;
   stage: string;
   message: string;
+  kind?: ProviderErrorKind;
+  detail?: string;
   status?: number;
   retryAfter?: number;
+}
+
+interface GroqChatPayload {
+  choices?: Array<{
+    finish_reason?: string | null;
+    message?: {
+      content?: string | null;
+      reasoning?: string | null;
+    };
+  }>;
+  error?: {
+    message?: string;
+    type?: string;
+    failed_generation?: unknown;
+  };
+  usage?: {
+    prompt_tokens?: number;
+    completion_tokens?: number;
+    total_tokens?: number;
+  };
 }
 
 class ModelSequenceError extends Error {
@@ -57,14 +83,22 @@ class ModelSequenceError extends Error {
   }
 }
 
+function truncate(value: string, limit = 500): string {
+  const normalized = value.replace(/\s+/gu, " ").trim();
+  return normalized.length <= limit ? normalized : `${normalized.slice(0, limit)}…`;
+}
+
 function extractJson(text: string): unknown {
   const cleaned = text.replace(/^```(?:json)?\s*/u, "").replace(/\s*```$/u, "").trim();
   try {
     return JSON.parse(cleaned);
-  } catch {
+  } catch (initialError) {
     const start = cleaned.indexOf("{");
     const end = cleaned.lastIndexOf("}");
-    if (start === -1 || end === -1 || end <= start) throw new Error("AI 응답에서 JSON 객체를 찾지 못했습니다.");
+    if (start === -1 || end === -1 || end <= start) {
+      const reason = initialError instanceof Error ? initialError.message : "JSON 문법 오류";
+      throw new Error(`JSON 객체를 찾지 못했습니다. ${reason}`);
+    }
     return JSON.parse(cleaned.slice(start, end + 1));
   }
 }
@@ -75,6 +109,65 @@ function parseRetryAfter(value: string | null): number | undefined {
   return Number.isFinite(seconds) && seconds > 0 ? Math.ceil(seconds) : undefined;
 }
 
+function isGptOss(model: string): boolean {
+  return model === "openai/gpt-oss-120b" || model === "openai/gpt-oss-20b";
+}
+
+function describeValidationError(error: unknown): { kind: ProviderErrorKind; message: string } {
+  if (error instanceof ZodError) {
+    const issues = error.issues.slice(0, 5).map((issue) => {
+      const path = issue.path.length > 0 ? issue.path.join(".") : "root";
+      return `${path}: ${issue.message}`;
+    });
+    const remaining = error.issues.length - issues.length;
+    return {
+      kind: "schema",
+      message: `${issues.join(" | ")}${remaining > 0 ? ` | 외 ${remaining}건` : ""}`,
+    };
+  }
+
+  if (error instanceof SyntaxError) {
+    return { kind: "json", message: `JSON 문법 오류: ${error.message}` };
+  }
+
+  if (error instanceof Error) {
+    const kind: ProviderErrorKind = /JSON/iu.test(error.message) ? "json" : "schema";
+    return { kind, message: error.message };
+  }
+
+  return { kind: "response", message: "알 수 없는 응답 처리 오류" };
+}
+
+function parseGroqPayload(rawBody: string): GroqChatPayload {
+  try {
+    return JSON.parse(rawBody) as GroqChatPayload;
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : "JSON 문법 오류";
+    throw new ProviderError(
+      "Groq API 응답 본문을 해석하지 못했습니다.",
+      undefined,
+      undefined,
+      "response",
+      `${reason}; body=${truncate(rawBody, 240)}`,
+    );
+  }
+}
+
+function groqErrorDetail(payload: GroqChatPayload, rawBody: string): string {
+  const parts: string[] = [];
+  if (payload.error?.message) parts.push(payload.error.message);
+  if (payload.error?.type) parts.push(`type=${payload.error.type}`);
+  if (payload.error?.failed_generation !== undefined) {
+    parts.push(`failed_generation=${truncate(JSON.stringify(payload.error.failed_generation), 240)}`);
+  }
+  if (parts.length === 0 && rawBody.trim()) parts.push(truncate(rawBody, 300));
+  return parts.join("; ");
+}
+
+function retryPrompt(prompt: string, issue: string): string {
+  return `${prompt}\n\n직전 응답이 다음 이유로 검증에 실패했습니다: ${issue}\n설명이나 Markdown 없이, 요구된 키와 개수를 정확히 지킨 유효한 JSON 객체 하나만 다시 반환하세요.`;
+}
+
 async function postChatCompletion<T>(options: {
   apiKey: string;
   model: string;
@@ -83,62 +176,122 @@ async function postChatCompletion<T>(options: {
   maxTokens: number;
   parse: (value: unknown) => T;
 }): Promise<T> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 45_000);
+  let correctionIssue: string | undefined;
 
-  try {
-    const response = await fetch(GROQ_ENDPOINT, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${options.apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: options.model,
-        messages: [
-          { role: "system", content: "Return only one valid JSON object that follows the requested schema." },
-          { role: "user", content: options.prompt },
-        ],
-        stream: false,
-        temperature: options.temperature,
-        max_tokens: options.maxTokens,
-      }),
-      cache: "no-store",
-      signal: controller.signal,
-    });
-
-    if (!response.ok) {
-      throw new ProviderError(
-        `${options.model} 요청 실패`,
-        response.status,
-        parseRetryAfter(response.headers.get("retry-after")),
-      );
-    }
-
-    const payload = (await response.json()) as {
-      choices?: Array<{ message?: { content?: string } }>;
+  for (let attempt = 0; attempt <= OUTPUT_RETRY_COUNT; attempt += 1) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 55_000);
+    const prompt = correctionIssue ? retryPrompt(options.prompt, correctionIssue) : options.prompt;
+    const requestBody: Record<string, unknown> = {
+      model: options.model,
+      messages: [
+        {
+          role: "system",
+          content: "반드시 유효한 JSON 객체 하나만 반환하세요. 설명, Markdown, 코드 펜스는 출력하지 마세요.",
+        },
+        { role: "user", content: prompt },
+      ],
+      stream: false,
+      temperature: attempt === 0 ? options.temperature : Math.min(options.temperature, 0.3),
+      max_completion_tokens: options.maxTokens,
+      response_format: { type: "json_object" },
     };
-    const content = payload.choices?.[0]?.message?.content;
-    if (!content) throw new ProviderError(`${options.model} 응답 내용이 비어 있습니다.`);
 
-    return options.parse(extractJson(content));
-  } catch (error) {
-    if (error instanceof ProviderError) throw error;
-    if (error instanceof Error && error.name === "AbortError") {
-      throw new ProviderError(`${options.model} 요청 시간이 초과되었습니다.`, 408);
+    if (isGptOss(options.model)) {
+      requestBody.reasoning_effort = "low";
+      requestBody.include_reasoning = false;
     }
-    throw new ProviderError(`${options.model} 응답 형식 또는 품질 검증에 실패했습니다.`);
-  } finally {
-    clearTimeout(timeout);
+
+    try {
+      const response = await fetch(GROQ_ENDPOINT, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${options.apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+        cache: "no-store",
+        signal: controller.signal,
+      });
+
+      const rawBody = await response.text();
+      const payload = parseGroqPayload(rawBody);
+
+      if (!response.ok) {
+        throw new ProviderError(
+          `${options.model} 요청 실패`,
+          response.status,
+          parseRetryAfter(response.headers.get("retry-after")),
+          "http",
+          groqErrorDetail(payload, rawBody),
+        );
+      }
+
+      const choice = payload.choices?.[0];
+      const content = choice?.message?.content?.trim();
+      if (!content) {
+        const details = [
+          choice?.finish_reason ? `finish_reason=${choice.finish_reason}` : undefined,
+          choice?.message?.reasoning ? "reasoning은 있으나 최종 content가 비어 있음" : undefined,
+          payload.usage ? `usage=${JSON.stringify(payload.usage)}` : undefined,
+        ].filter(Boolean).join("; ");
+        const emptyReason = choice?.finish_reason === "length"
+          ? "출력 토큰 한도에 도달해 최종 JSON이 생성되지 않았습니다."
+          : "최종 응답 내용이 비어 있습니다.";
+
+        if (attempt < OUTPUT_RETRY_COUNT) {
+          correctionIssue = `${emptyReason}${details ? ` (${details})` : ""}`;
+          continue;
+        }
+
+        throw new ProviderError(
+          `${options.model} ${emptyReason}`,
+          502,
+          undefined,
+          "empty",
+          details || undefined,
+        );
+      }
+
+      try {
+        return options.parse(extractJson(content));
+      } catch (error) {
+        const validation = describeValidationError(error);
+        if (attempt < OUTPUT_RETRY_COUNT) {
+          correctionIssue = validation.message;
+          continue;
+        }
+        throw new ProviderError(
+          `${options.model} JSON 검증 실패: ${validation.message}`,
+          502,
+          undefined,
+          validation.kind,
+          `finish_reason=${choice?.finish_reason ?? "unknown"}; content=${truncate(content, 320)}`,
+        );
+      }
+    } catch (error) {
+      if (error instanceof ProviderError) throw error;
+      if (error instanceof Error && error.name === "AbortError") {
+        throw new ProviderError(`${options.model} 요청 시간이 초과되었습니다.`, 408, undefined, "timeout");
+      }
+      const message = error instanceof Error ? error.message : "알 수 없는 오류";
+      throw new ProviderError(`${options.model} 응답 처리 실패: ${message}`, 502, undefined, "response");
+    } finally {
+      clearTimeout(timeout);
+    }
   }
+
+  throw new ProviderError(`${options.model} 응답 처리에 실패했습니다.`, 502, undefined, "response");
 }
 
 function providerMessage(error: unknown): string {
   if (!(error instanceof ProviderError)) return "알 수 없는 오류";
-  if (error.status === 401 || error.status === 403) return "API 인증 오류";
-  if (error.status === 429) return "API 요청 한도 초과";
+  if (error.status === 401 || error.status === 403) return `API 인증 오류${error.detail ? `: ${error.detail}` : ""}`;
+  if (error.status === 429) return `API 요청 한도 초과${error.detail ? `: ${error.detail}` : ""}`;
   if (error.status === 408) return "API 응답 시간 초과";
-  if (error.status && error.status >= 500) return "API 서버 오류";
+  if (error.status && error.status >= 500 && error.kind === "http") {
+    return `Groq 서버 오류${error.detail ? `: ${error.detail}` : ""}`;
+  }
   return error.message;
 }
 
@@ -213,6 +366,8 @@ async function runModelSequence<T>(options: {
         model,
         stage: options.stage,
         message: providerMessage(error),
+        kind: error instanceof ProviderError ? error.kind : undefined,
+        detail: error instanceof ProviderError ? error.detail : undefined,
         status: error instanceof ProviderError ? error.status : undefined,
         retryAfter: error instanceof ProviderError ? error.retryAfter : undefined,
       };
@@ -223,7 +378,9 @@ async function runModelSequence<T>(options: {
         stage: options.stage,
         model,
         status: failure.status ?? null,
+        kind: failure.kind ?? null,
         reason: failure.message,
+        detail: failure.detail ?? null,
         modelDurationMs: Date.now() - modelStartedAt,
       });
     }
@@ -395,7 +552,7 @@ function mergeTargetResult(input: GenerateRequest, generated: Record<string, unk
   return existingGenerationResultSchema.parse({ ...input.existing, hashtags: generated.hashtags }) as GenerationResult;
 }
 
-function sequenceErrorResponse(error: ModelSequenceError): NextResponse {
+function sequenceErrorResponse(error: ModelSequenceError, requestId: string): NextResponse {
   const status = failureStatus(error.failures);
   const retryAfter = Math.max(
     DEFAULT_RETRY_AFTER_SECONDS,
@@ -403,9 +560,17 @@ function sequenceErrorResponse(error: ModelSequenceError): NextResponse {
   );
   return NextResponse.json(
     {
-      error: `Groq 호출에 실패했습니다. ${error.failures
+      error: `Groq 모델 호출에 모두 실패했습니다. ${error.failures
         .map((failure) => `${failure.stage}/${failure.model}: ${failure.message}`)
         .join(" / ")}`,
+      requestId,
+      failures: error.failures.map((failure) => ({
+        stage: failure.stage,
+        model: failure.model,
+        status: failure.status ?? null,
+        kind: failure.kind ?? null,
+        reason: failure.message,
+      })),
     },
     {
       status,
@@ -424,7 +589,7 @@ export async function POST(request: Request) {
   } catch {
     logGeneration("generation.invalid_request", { requestId, durationMs: Date.now() - requestStartedAt });
     return NextResponse.json(
-      { error: "요청 정보가 올바르지 않습니다. 가수와 대표곡을 다시 선택해 주세요." },
+      { error: "요청 정보가 올바르지 않습니다. 가수와 대표곡을 다시 선택해 주세요.", requestId },
       { status: 400 },
     );
   }
@@ -453,7 +618,7 @@ export async function POST(request: Request) {
       reason: "missing_api_key",
       durationMs: Date.now() - requestStartedAt,
     });
-    return NextResponse.json({ error: "GROQ_API_KEY가 설정되지 않았습니다." }, { status: 503 });
+    return NextResponse.json({ error: "GROQ_API_KEY가 설정되지 않았습니다.", requestId }, { status: 503 });
   }
 
   try {
@@ -520,21 +685,28 @@ export async function POST(request: Request) {
           stage: failure.stage,
           model: failure.model,
           status: failure.status ?? null,
+          kind: failure.kind ?? null,
           reason: failure.message,
+          detail: failure.detail ?? null,
         })),
       });
-      return sequenceErrorResponse(error);
+      return sequenceErrorResponse(error, requestId);
     }
 
+    const detail = error instanceof ZodError
+      ? describeValidationError(error).message
+      : error instanceof Error
+        ? error.message
+        : "unknown_error";
     logGeneration("generation.failed", {
       requestId,
       target: parsed.target,
       status: 502,
-      reason: error instanceof Error ? error.message : "unknown_error",
+      reason: detail,
       durationMs: Date.now() - requestStartedAt,
     });
     return NextResponse.json(
-      { error: "생성 결과를 검증하거나 결합하는 중 오류가 발생했습니다. 다시 시도해 주세요." },
+      { error: `생성 결과를 검증하거나 결합하는 중 오류가 발생했습니다. ${detail}`, requestId },
       { status: 502 },
     );
   }
