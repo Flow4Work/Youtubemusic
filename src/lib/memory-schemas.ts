@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { normalizeMemoryResponse } from "@/lib/memory-normalize";
 import { MEMORY_STYLES, getMemoryTopic, isMemoryStyle } from "@/lib/memory-song";
 import { chordResultSchema, existingGenerationResultSchema } from "@/lib/schemas";
 import type { GenerationTarget, MemoryGenerateRequest } from "@/lib/types";
@@ -99,8 +100,10 @@ export function parseMemoryTargetResult(
   value: unknown,
   expectedItems: readonly string[],
 ): Record<string, unknown> {
+  const normalized = normalizeMemoryResponse(value, expectedItems);
+
   if (target === "all") {
-    const parsed = memoryFullResponseSchema.parse(value);
+    const parsed = memoryFullResponseSchema.parse(normalized);
     assertExactSequence(parsed.memorySequence, expectedItems);
     assertSequenceInLyrics(parsed.lyrics.a, expectedItems, "A안");
     assertSequenceInLyrics(parsed.lyrics.b, expectedItems, "B안");
@@ -115,16 +118,16 @@ export function parseMemoryTargetResult(
     };
   }
   if (target === "lyrics") {
-    const parsed = memoryLyricsResponseSchema.parse(value);
+    const parsed = memoryLyricsResponseSchema.parse(normalized);
     assertExactSequence(parsed.memorySequence, expectedItems);
     assertSequenceInLyrics(parsed.lyrics.a, expectedItems, "A안");
     assertSequenceInLyrics(parsed.lyrics.b, expectedItems, "B안");
     return { lyrics: parsed.lyrics };
   }
-  if (target === "chords") return memoryChordsResponseSchema.parse(value);
-  if (target === "style") return memoryStyleResponseSchema.parse(value);
-  if (target === "titles") return memoryTitlesResponseSchema.parse(value);
-  return memoryHashtagsResponseSchema.parse(value);
+  if (target === "chords") return memoryChordsResponseSchema.parse(normalized);
+  if (target === "style") return memoryStyleResponseSchema.parse(normalized);
+  if (target === "titles") return memoryTitlesResponseSchema.parse(normalized);
+  return memoryHashtagsResponseSchema.parse(normalized);
 }
 
 export function parseMemoryRequest(value: unknown): MemoryGenerateRequest {
