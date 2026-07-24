@@ -22,5 +22,35 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
-      - name: Lint and build
-        run: npm run check
+      - name: Capture lint and build output
+        shell: bash
+        run: |
+          set +e
+          npm run check > check.log 2>&1
+          echo "$?" > check-exit-code
+          exit 0
+
+      - name: Upload validation output
+        uses: actions/upload-artifact@v4
+        with:
+          name: memory-song-check
+          path: |
+            check.log
+            check-exit-code
+          retention-days: 1
+
+  report:
+    needs: check
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download validation output
+        uses: actions/download-artifact@v4
+        with:
+          name: memory-song-check
+
+      - name: Report validation result
+        shell: bash
+        run: |
+          tail -n 120 check.log
+          test "$(cat check-exit-code)" = "0"
