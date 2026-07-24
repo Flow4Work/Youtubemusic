@@ -1,9 +1,9 @@
 name: Validate memory song mode
 
 on:
-  push:
+  pull_request:
     branches:
-      - agent/add-memory-song-mode
+      - agent/fix-groq-response-handling
   workflow_dispatch:
 
 jobs:
