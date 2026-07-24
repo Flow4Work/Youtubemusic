@@ -18,12 +18,14 @@ ${itemSource(topic)}
 - 누락, 추가, 합치기, 순서 변경을 금지합니다.
 - 어린이 전용 말투와 과도하게 유아적인 표현을 피하세요.
 - 특정 가수, 기존 곡, 목소리 복제를 요청하지 마세요.
+- 최상위 값은 배열이 아닌 JSON 객체여야 합니다.
 - 설명, Markdown, 코드블록 없이 JSON 객체 하나만 반환하세요.`;
 }
 
 function lyricRules(): string {
   return `가사 규칙:
-- lyrics.a와 lyrics.b 모두 [Intro], [Verse], [Chorus], [Bridge], [Outro]를 포함하세요.
+- lyrics.a와 lyrics.b는 객체나 배열이 아닌 완성된 문자열이어야 합니다.
+- 두 문자열 모두 [Intro], [Verse], [Chorus], [Bridge], [Outro]를 포함하세요.
 - 두 가사 모두 전체 암기 항목을 정확한 표기와 순서로 최소 한 번 포함하세요.
 - A안은 리듬과 반복 중심, B안은 멜로디와 따라 부르기 중심으로 구분하세요.
 - 설명 문장보다 실제 암기 항목을 더 많이 사용하세요.
@@ -34,7 +36,9 @@ function lyricRules(): string {
 function chordRules(input: MemoryGenerateRequest): string {
   return `코드 규칙:
 - ${input.style}에 맞는 key, bpm, timeSignature를 작성하세요.
-- chords.sections에는 verse, chorus, bridge를 반드시 넣고 배열을 비우지 마세요.
+- chords.sections의 intro, verse, chorus, bridge 값은 각각 문자열이 아니라 문자열 배열이어야 합니다.
+- 진행이 하나뿐이어도 예: "verse": ["C - G - Am - F"]처럼 배열로 반환하세요.
+- verse, chorus, bridge 배열을 비우지 마세요.
 - 일반적인 코드명만 사용하고 암기 항목 발음이 묻히지 않는 단순한 진행으로 작성하세요.`;
 }
 
@@ -73,15 +77,8 @@ ${styleRules(input)}
 ${titleRules(topic)}
 ${hashtagRules(topic)}
 
-반환 키와 구조:
-- memorySequence: 위 암기 항목 JSON 배열을 한 글자도 바꾸지 않고 그대로 복사한 배열
-- chords: { key, bpm, timeSignature, sections: { verse, chorus, bridge, 필요 시 intro와 outro } }
-- sunoStyle: 영어 한 문단
-- sunoStyleKorean: 한국어 설명
-- lyrics: { a, b }
-- titles: 한국어 제목 3개 배열
-- titlesEnglish: 영어 제목 3개 배열
-- hashtags: 해시태그 8개 배열`;
+정확한 반환 구조:
+{"memorySequence":["원본 항목"],"chords":{"key":"C major","bpm":120,"timeSignature":"4/4","sections":{"intro":["C - G"],"verse":["C - G - Am - F"],"chorus":["F - G - C - Am"],"bridge":["Am - F - C - G"]}},"sunoStyle":"English paragraph","sunoStyleKorean":"한국어 설명","lyrics":{"a":"[Intro]\\n...","b":"[Intro]\\n..."},"titles":["제목1","제목2","제목3"],"titlesEnglish":["Title 1","Title 2","Title 3"],"hashtags":["#태그1","#태그2","#태그3","#태그4","#태그5","#태그6","#태그7","#태그8"]}`;
   }
 
   if (input.target === "lyrics") {
@@ -89,10 +86,7 @@ ${hashtagRules(topic)}
 
 이번에는 가사만 다시 만드세요.
 ${lyricRules()}
-
-반환 구조:
-- memorySequence: 위 암기 항목 배열을 그대로 복사
-- lyrics: { a, b }`;
+반환 구조: {"memorySequence":["원본 항목"],"lyrics":{"a":"[Intro]\\n...","b":"[Intro]\\n..."}}`;
   }
 
   if (input.target === "chords") {
@@ -100,7 +94,7 @@ ${lyricRules()}
 
 이번에는 코드만 다시 만드세요.
 ${chordRules(input)}
-반환 구조: { "chords": { "key", "bpm", "timeSignature", "sections" } }`;
+반환 구조: {"chords":{"key":"C major","bpm":120,"timeSignature":"4/4","sections":{"intro":["C - G"],"verse":["C - G - Am - F"],"chorus":["F - G - C - Am"],"bridge":["Am - F - C - G"]}}}`;
   }
 
   if (input.target === "style") {
@@ -108,7 +102,7 @@ ${chordRules(input)}
 
 이번에는 Suno 스타일만 다시 만드세요.
 ${styleRules(input)}
-반환 구조: { "sunoStyle": "영어 한 문단", "sunoStyleKorean": "한국어 설명" }`;
+반환 구조: {"sunoStyle":"영어 한 문단","sunoStyleKorean":"한국어 설명"}`;
   }
 
   if (input.target === "titles") {
@@ -116,12 +110,12 @@ ${styleRules(input)}
 
 이번에는 제목만 다시 만드세요.
 ${titleRules(topic)}
-반환 구조: { "titles": [3개], "titlesEnglish": [3개] }`;
+반환 구조: {"titles":["제목1","제목2","제목3"],"titlesEnglish":["Title 1","Title 2","Title 3"]}`;
   }
 
   return `${base}
 
 이번에는 해시태그만 다시 만드세요.
 ${hashtagRules(topic)}
-반환 구조: { "hashtags": [8개] }`;
+반환 구조: {"hashtags":["#태그1","#태그2","#태그3","#태그4","#태그5","#태그6","#태그7","#태그8"]}`;
 }
