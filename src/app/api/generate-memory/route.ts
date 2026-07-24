@@ -18,7 +18,10 @@ export const maxDuration = 120;
 
 const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
 const DEFAULT_RETRY_AFTER_SECONDS = 10;
-const OUTPUT_RETRY_COUNT = 1;
+
+// 같은 모델을 즉시 재호출하면 무료 TPM 한도를 다시 소모한다.
+// 형식 오류는 다음 fallback 모델에서 처리하도록 한 번만 호출한다.
+const OUTPUT_RETRY_COUNT = 0;
 
 type ErrorKind = "http" | "timeout" | "empty" | "json" | "schema" | "response";
 
@@ -107,6 +110,7 @@ function parsePayload(raw: string): GroqPayload {
 function providerMessage(error: unknown): string {
   if (!(error instanceof ProviderError)) return error instanceof Error ? error.message : "알 수 없는 오류";
   if (error.status === 401 || error.status === 403) return `API 인증 오류${error.detail ? `: ${error.detail}` : ""}`;
+  if (error.status === 413) return `요청 크기 초과${error.detail ? `: ${error.detail}` : ""}`;
   if (error.status === 429) return `API 요청 한도 초과${error.detail ? `: ${error.detail}` : ""}`;
   if (error.status === 408) return "API 응답 시간 초과";
   return error.message;
@@ -130,11 +134,13 @@ function modelsForTarget(target: GenerationTarget): string[] {
 }
 
 function generationOptions(target: GenerationTarget): { temperature: number; maxTokens: number } {
-  if (target === "all") return { temperature: 0.42, maxTokens: 7200 };
-  if (target === "lyrics") return { temperature: 0.45, maxTokens: 6200 };
-  if (target === "style" || target === "titles") return { temperature: 0.62, maxTokens: 1500 };
-  if (target === "chords") return { temperature: 0.38, maxTokens: 1500 };
-  return { temperature: 0.5, maxTokens: 700 };
+  // Groq 무료 GPT-OSS 모델은 요청 전체가 8,000 TPM 안에 들어와야 한다.
+  // 기존 7,200 출력 예약은 프롬프트를 합쳐 8,600여 토큰이 되어 413을 만들었다.
+  if (target === "all") return { temperature: 0.42, maxTokens: 4200 };
+  if (target === "lyrics") return { temperature: 0.45, maxTokens: 3600 };
+  if (target === "style" || target === "titles") return { temperature: 0.62, maxTokens: 1100 };
+  if (target === "chords") return { temperature: 0.38, maxTokens: 1000 };
+  return { temperature: 0.5, maxTokens: 500 };
 }
 
 function isGptOss(model: string): boolean {
@@ -187,8 +193,11 @@ async function callModel<T>(options: {
       const payload = parsePayload(raw);
 
       if (!response.ok) {
-        const detail = [payload.error?.message, payload.error?.type, payload.error?.failed_generation ? truncate(JSON.stringify(payload.error.failed_generation), 220) : ""]
-          .filter(Boolean).join("; ");
+        const detail = [
+          payload.error?.message,
+          payload.error?.type,
+          payload.error?.failed_generation ? truncate(JSON.stringify(payload.error.failed_generation), 220) : "",
+        ].filter(Boolean).join("; ");
         throw new ProviderError(
           `${options.model} 요청 실패`,
           response.status,
@@ -272,6 +281,8 @@ async function runModelSequence<T>(options: {
         requestId: options.requestId,
         target: options.target,
         model,
+        maxTokens: generation.maxTokens,
+        promptChars: options.prompt.length,
         durationMs: Date.now() - startedAt,
         failedModels: failures.length,
       }));
@@ -292,6 +303,8 @@ async function runModelSequence<T>(options: {
         requestId: options.requestId,
         target: options.target,
         model,
+        maxTokens: generation.maxTokens,
+        promptChars: options.prompt.length,
         status: failure.status ?? null,
         kind: failure.kind ?? null,
         reason: failure.message,
@@ -356,11 +369,12 @@ export async function POST(request: Request) {
   }
 
   try {
+    const prompt = buildMemoryGenerationPrompt(parsed, topic);
     const run = await runModelSequence<Record<string, unknown>>({
       requestId,
       target: parsed.target,
       apiKey: groqKey,
-      prompt: buildMemoryGenerationPrompt(parsed, topic),
+      prompt,
       parse: (value) => parseMemoryTargetResult(parsed.target, value, topic.items),
     });
     const result = mergeMemoryResult(parsed, run.value);
