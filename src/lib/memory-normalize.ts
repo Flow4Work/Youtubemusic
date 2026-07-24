@@ -25,12 +25,13 @@ function asRecord(value: unknown): JsonRecord {
     }
 
     if (!isRecord(current)) return {};
+    const record = current;
 
     const wrapperKey = ["result", "data", "output", "response"].find(
-      (key) => key in current && Object.keys(current).length === 1,
+      (key) => key in record && Object.keys(record).length === 1,
     );
-    if (!wrapperKey) return current;
-    current = current[wrapperKey];
+    if (!wrapperKey) return record;
+    current = record[wrapperKey];
   }
 
   return isRecord(current) ? current : {};
