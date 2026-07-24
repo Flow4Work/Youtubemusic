@@ -83,14 +83,14 @@ export function MemorySongSelection(props: Props) {
           </div>
         </>}
       </section>
+    </div>
 
-      <section className="selection-block memory-generate-block">
-        <div className="selection-label"><span>3</span><strong>암기송 생성</strong></div>
-        <button type="button" onClick={props.onGenerate} disabled={!props.canGenerate} className={`generate-button ${styles.generateButton}`}>
-          {props.loadingTarget ? <RefreshIcon className="size-5 animate-spin"/> : <SparklesIcon className="size-5"/>}
-          <span>{buttonLabel}</span>
-        </button>
-      </section>
+    <div className={styles.generateFooter}>
+      <div className="selection-label"><span>3</span><strong>암기송 생성</strong></div>
+      <button type="button" onClick={props.onGenerate} disabled={!props.canGenerate} className={`generate-button ${styles.generateButton}`}>
+        {props.loadingTarget ? <RefreshIcon className="size-5 animate-spin"/> : <SparklesIcon className="size-5"/>}
+        <span>{buttonLabel}</span>
+      </button>
     </div>
   </aside>;
 }
