@@ -13,10 +13,10 @@ jobs:
         uses: actions/checkout@v4
       - name: Package source
         run: |
-          tar --exclude=.git --exclude=node_modules --exclude=.next -czf youtubemusic-source.tar.gz .
+          tar --exclude=.git --exclude=node_modules --exclude=.next --exclude=.github/workflows/export-source.yml -czf /tmp/youtubemusic-source.tar.gz .
       - name: Upload source
         uses: actions/upload-artifact@v4
         with:
           name: youtubemusic-source
-          path: youtubemusic-source.tar.gz
+          path: /tmp/youtubemusic-source.tar.gz
           if-no-files-found: error
